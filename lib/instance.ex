@@ -5,11 +5,11 @@ defmodule Virta.Instance do
     Graph.topsort(graph)
     |> Enum.reverse
     |> Enum.reduce(lookup_table, fn(node, lookup_table) ->
-      { inports, _args } = Code.eval_string(node[:module] <> ".inports")
+      inports = String.to_existing_atom("Elixir." <> Map.get(node, :module)).inports
       inport_args = List.duplicate(nil, Enum.count(inports))
       outport_args = get_outport_args(graph, node, lookup_table)
 
-      module = Module.concat("Elixir", node[:module])
+      module = Module.concat("Elixir", Map.get(node, :module))
       { :ok, pid } = Task.start_link(module, :loop, inport_args ++ outport_args)
       Map.put(lookup_table, node, pid)
     end)

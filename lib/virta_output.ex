@@ -5,7 +5,7 @@ defmodule Virta.Output do
   def loop(_in_port, _out_pid) do
     receive do
       {:in_port, value} ->
-        IO.puts("\nCore.Output:in = #{inspect value}")
+        IO.puts("#{inspect value}")
         loop(nil, nil)
     end
   end

@@ -1,0 +1,3 @@
+%{
+  "libgraph": {:hex, :libgraph, "0.12.0", "e837d552ab739cc42042ae67a9a5433ed6c383becec705a4010114e1b73c9a36", [:mix], [], "hexpm"},
+}

@@ -18,6 +18,7 @@ defmodule Virta.Instance do
   # Server Callbacks
 
   def init({ :ok, graph }) do
+    Process.flag(:trap_exit, true)
     { :ok, %{ graph: graph } }
   end
 
@@ -50,8 +51,24 @@ defmodule Virta.Instance do
   end
 
   def handle_info({ :output, output }, state) do
-    IO.inspect(output)
-    { :stop, :normal, state }
+    { :noreply, Map.put(state, :output, { :ok, output }) }
+  end
+
+  def handle_info({ :EXIT, _pid, reason }, state) do
+    count = Map.get(state, :count) || 0
+
+    state = unless reason == :normal do
+      Map.put(state, :output, { :error, reason })
+    else
+      state
+    end
+
+    if(length(Graph.vertices(Map.get(state, :graph))) == count + 1) do
+      IO.puts("Exiting: #{inspect Map.get(state, :output)}")
+      { :stop, :normal, state }
+    else
+      { :noreply, Map.put(state, :count, count + 1) }
+    end
   end
 
   # Private functions

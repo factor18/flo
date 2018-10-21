@@ -11,7 +11,6 @@ defmodule Virta.Math.Add do
         inport_args = Map.put(inport_args, port, value)
         if(@inports |> Enum.all?(&(Map.has_key?(inport_args, &1)))) do
           run(inport_args, outport_args, instance_pid)
-          loop(%{}, outport_args, instance_pid)
         else
           loop(inport_args, outport_args, instance_pid)
         end

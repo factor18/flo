@@ -1,4 +1,4 @@
 defmodule Virta.EdgeData do
   @enforce_keys [ :from, :to ]
-  defstruct [ from: nil, to: nil ]
+  defstruct [ from: nil, to: nil, deflate: nil ]
 end

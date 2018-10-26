@@ -51,6 +51,7 @@ defmodule Virta.Instance do
   end
 
   def handle_info({ :output, output }, state) do
+    :io.format("#{Map.get(output, :sum)}")
     { :noreply, Map.put(state, :output, { :ok, output }) }
   end
 
@@ -78,8 +79,7 @@ defmodule Virta.Instance do
     if(Keyword.has_key?(module.__info__(:functions), :deflate) && module.deflate) do
       in_edges = Graph.in_edges(graph, node)
       Enum.map(in_edges, fn(edge) ->
-        %{ label: label } = edge
-        Map.put(label, :deflate, true)
+        Map.get(edge, :label)
       end)
     else
       out_edges = Graph.out_edges(graph, node)

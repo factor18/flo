@@ -18,7 +18,7 @@ defmodule Virta do
     |> Graph.add_edge(
       %Node{ module: "Virta.Math.Add", id: 1 },
       %Node{ module: "Virta.IO.Output", id: 2 },
-      label: %EdgeData{ from: :sum, to: :in_port }
+      label: %EdgeData{ from: :sum, to: :in }
     )
     |> Graph.add_edge(
       %Node{ module: "Virta.Math.Add", id: 1 },
@@ -33,7 +33,7 @@ defmodule Virta do
     |> Graph.add_edge(
       %Node{ module: "Virta.Math.Add", id: 3 },
       %Node{ module: "Virta.IO.Output", id: 4 },
-      label: %EdgeData{ from: :sum, to: :in_port }
+      label: %EdgeData{ from: :sum, to: :in }
     )
     |> Graph.add_edge(
       %Node{ module: "Virta.Math.Add", id: 3 },
@@ -48,7 +48,7 @@ defmodule Virta do
     |> Graph.add_edge(
       %Node{ module: "Virta.Math.Add", id: 5 },
       %Node{ module: "Virta.IO.Output", id: 6 },
-      label: %EdgeData{ from: :sum, to: :in_port }
+      label: %EdgeData{ from: :sum, to: :in }
     )
     |> Graph.add_edge(
       %Node{ module: "Virta.Math.Add", id: 5 },

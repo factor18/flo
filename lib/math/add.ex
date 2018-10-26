@@ -4,12 +4,9 @@ defmodule Virta.Math.Add do
 
   use Virta.Component
 
-  def run(inport_args, outport_args, _instance_pid) do
-    %{ augend: augend, addend: addend } = inport_args
-    value = augend + addend
-    Enum.map(outport_args, fn(outport_arg) ->
-      %{ pid: pid, to: to } = outport_arg
-      send(pid, { to, value })
-    end)
+  @impl true
+  def run(inport_args, _outport_args, _instance_pid) do
+    value = Map.get(inport_args, :augend) + Map.get(inport_args, :addend)
+    { :normal, %{ sum: value } }
   end
 end

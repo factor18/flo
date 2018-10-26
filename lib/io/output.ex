@@ -1,11 +1,12 @@
 defmodule Virta.IO.Output do
-  @inports [ :in_port ]
+  @inports [ :in ]
   @outports []
 
   use Virta.Component
 
+  @impl true
   def run(inport_args, _outport_args, _instance_pid) do
-    %{ in_port: in_port } = inport_args
-    IO.puts("#{inspect in_port}")
+    IO.puts("#{inspect Map.get(inport_args, :in)}")
+    { :noreply }
   end
 end

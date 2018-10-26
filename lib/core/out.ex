@@ -14,14 +14,7 @@ defmodule Virta.Core.Out do
     end
   end
 
-  def run(inport_args, outport_args, instance_pid) do
-    if(length(outport_args) > 0 && Enum.any?(outport_args, &(Map.has_key?(&1, :deflate)))) do
-      send(instance_pid, { :output, inport_args })
-    else
-      Enum.map(outport_args, fn(arg) ->
-        %{ to: port, pid: pid } = arg
-        send(pid, { port , Map.get(inport_args, port) })
-      end)
-    end
+  def run(inport_args, _outport_args, instance_pid) do
+    send(instance_pid, { :output, inport_args })
   end
 end

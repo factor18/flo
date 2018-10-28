@@ -14,8 +14,6 @@ defmodule Virta.Instance do
   # Server Callbacks
 
   def init({ :ok, graph }) do
-    Process.flag(:trap_exit, true)
-
     lookup_table = graph
     |> Graph.topsort
     |> Enum.reverse
@@ -48,11 +46,6 @@ defmodule Virta.Instance do
   def handle_info({ request_id, :output, output }, state) do
     send(Map.get(state, :from), { request_id, output })
     { :noreply, state}
-  end
-
-  def handle_info({ :EXIT, _pid, reason }, state) do
-    IO.inspect(reason)
-    { :noreply, state }
   end
 
   # Private functions

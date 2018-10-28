@@ -9,8 +9,8 @@ defmodule Virta.Pool do
     [
       {:name, {:local, String.to_atom(name)}},
       {:worker_module, Virta.Instance},
-      {:size, 5},
-      {:max_overflow, 2}
+      {:size, 50},
+      {:max_overflow, 0}
     ]
   end
 

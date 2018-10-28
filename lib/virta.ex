@@ -1,7 +1,13 @@
 defmodule Virta do
   alias Virta.Node
+  alias Virta.Registry
   alias Virta.EdgeData
   alias Virta.Instance
+  alias Virta.Supervisor
+
+  def start(_type, _args) do
+    Supervisor.start_link(name: Supervisor)
+  end
 
   def run do
     graph = Graph.new(type: :directed)
@@ -42,13 +48,15 @@ defmodule Virta do
     )
 
     unless Graph.is_cyclic?(graph) do
-      { :ok, server } = Instance.start_link(graph)
+      Registry.register("adder", graph)
+      server = Registry.get("adder")
+
       Enum.each(1..100, fn i ->
         data = %{
           %Node{ module: "Virta.Core.In", id: 0 } => [{ i, :augend, i }, { i, :addend,  i*2 }]
         }
 
-        :ok = Instance.execute(server, data)
+        Instance.execute(server, data)
         receive do
           message ->
             IO.inspect(message)

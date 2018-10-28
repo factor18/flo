@@ -5,6 +5,8 @@ defmodule Virta do
   alias Virta.Instance
   alias Virta.Supervisor
 
+  use Application
+
   def start(_type, _args) do
     Supervisor.start_link(name: Supervisor)
   end
@@ -48,19 +50,22 @@ defmodule Virta do
     )
 
     unless Graph.is_cyclic?(graph) do
-      Registry.register("adder", graph)
-      server = Registry.get("adder")
+      name = "adder"
+      Registry.register(name, graph)
+      Registry.get(name)
 
-      Enum.each(1..100, fn i ->
+      Enum.each(1..100000, fn i ->
         data = %{
           %Node{ module: "Virta.Core.In", id: 0 } => [{ i, :augend, i }, { i, :addend,  i*2 }]
         }
 
-        Instance.execute(server, data)
-        receive do
-          message ->
-            IO.inspect(message)
-        end
+        :poolboy.transaction(String.to_existing_atom(name), fn (server) ->
+          Instance.execute(server, data)
+          receive do
+            message -> IO.inspect(message)
+          end
+        end)
+
       end)
     else
       raise "Graph is expected to be acyclic"

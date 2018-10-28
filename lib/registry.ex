@@ -1,7 +1,7 @@
 defmodule Virta.Registry do
   use GenServer
 
-  alias Virta.Instance
+  alias Virta.Pool
   alias Virta.InstanceSupervisor
 
   # ------------------------------------------------------------------------------- Client API -----
@@ -40,7 +40,7 @@ defmodule Virta.Registry do
     if Map.has_key?(state, name) do
       { :noreply, state }
     else
-      { :ok, pid } = DynamicSupervisor.start_child(InstanceSupervisor, { Instance, graph })
+      { :ok, pid } = DynamicSupervisor.start_child(InstanceSupervisor, { Pool, %{ name: name, graph: graph } })
       { :noreply, Map.put(state, name, pid) }
     end
   end

@@ -1,3 +1,4 @@
 %{
   "libgraph": {:hex, :libgraph, "0.12.0", "e837d552ab739cc42042ae67a9a5433ed6c383becec705a4010114e1b73c9a36", [:mix], [], "hexpm"},
+  "poolboy": {:hex, :poolboy, "1.5.1", "6b46163901cfd0a1b43d692657ed9d7e599853b3b21b95ae5ae0a777cf9b6ca8", [:rebar], [], "hexpm"},
 }

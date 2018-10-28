@@ -17,11 +17,6 @@ defmodule Virta do
     )
     |> Graph.add_edge(
       %Node{ module: "Virta.Math.Add", id: 1 },
-      %Node{ module: "Virta.IO.Output", id: 2 },
-      label: %EdgeData{ from: :sum, to: :in }
-    )
-    |> Graph.add_edge(
-      %Node{ module: "Virta.Math.Add", id: 1 },
       %Node{ module: "Virta.Math.Add", id: 3 },
       label: %EdgeData{ from: :sum, to: :addend }
     )
@@ -32,11 +27,6 @@ defmodule Virta do
     )
     |> Graph.add_edge(
       %Node{ module: "Virta.Math.Add", id: 3 },
-      %Node{ module: "Virta.IO.Output", id: 4 },
-      label: %EdgeData{ from: :sum, to: :in }
-    )
-    |> Graph.add_edge(
-      %Node{ module: "Virta.Math.Add", id: 3 },
       %Node{ module: "Virta.Math.Add", id: 5 },
       label: %EdgeData{ from: :sum, to: :addend }
     )
@@ -44,11 +34,6 @@ defmodule Virta do
       %Node{ module: "Virta.Math.Add", id: 3 },
       %Node{ module: "Virta.Math.Add", id: 5 },
       label: %EdgeData{ from: :sum, to: :augend }
-    )
-    |> Graph.add_edge(
-      %Node{ module: "Virta.Math.Add", id: 5 },
-      %Node{ module: "Virta.IO.Output", id: 6 },
-      label: %EdgeData{ from: :sum, to: :in }
     )
     |> Graph.add_edge(
       %Node{ module: "Virta.Math.Add", id: 5 },
@@ -56,14 +41,19 @@ defmodule Virta do
       label: %EdgeData{ from: :sum, to: :sum }
     )
 
-    data = %{
-      %Node{ module: "Virta.Core.In", id: 0 } => [{ :inflate,  %{ augend: 0, addend: 1 } }]
-    }
-
     unless Graph.is_cyclic?(graph) do
       { :ok, server } = Instance.start_link(graph)
-      Instance.initialize(server)
-      Instance.execute(server, data)
+      Enum.each(1..100, fn i ->
+        data = %{
+          %Node{ module: "Virta.Core.In", id: 0 } => [{ i, :augend, i }, { i, :addend,  i*2 }]
+        }
+
+        :ok = Instance.execute(server, data)
+        receive do
+          message ->
+            IO.inspect(message)
+        end
+      end)
     else
       raise "Graph is expected to be acyclic"
     end

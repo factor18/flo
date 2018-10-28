@@ -5,8 +5,8 @@ defmodule Virta.Math.Add do
   use Virta.Component
 
   @impl true
-  def run(inport_args, _outport_args, _instance_pid) do
+  def run(request_id, inport_args, _outport_args, _instance_pid) do
     value = Map.get(inport_args, :augend) + Map.get(inport_args, :addend)
-    { :normal, %{ sum: value } }
+    { request_id, :normal, %{ sum: value } }
   end
 end

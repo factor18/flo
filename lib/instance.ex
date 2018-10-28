@@ -7,23 +7,14 @@ defmodule Virta.Instance do
     GenServer.start_link(__MODULE__, { :ok, graph })
   end
 
-  def initialize(server) do
-    GenServer.call(server, { :initialize })
-  end
-
   def execute(server, data) do
-    GenServer.cast(server, { :execute, data })
+    GenServer.call(server, { :execute, data })
   end
 
   # Server Callbacks
 
   def init({ :ok, graph }) do
     Process.flag(:trap_exit, true)
-    { :ok, %{ graph: graph } }
-  end
-
-  def handle_call({ :initialize }, _from, state) do
-    graph = Map.get(state, :graph)
 
     lookup_table = graph
     |> Graph.topsort
@@ -35,10 +26,14 @@ defmodule Virta.Instance do
       Map.put(lookup_table, node, pid)
     end)
 
-    { :reply, lookup_table, Map.put(state, :lookup_table, lookup_table )}
+    state = Map.new()
+    |> Map.put(:graph, graph)
+    |> Map.put(:lookup_table, lookup_table)
+
+    { :ok, state }
   end
 
-  def handle_cast({ :execute, data }, state) do
+  def handle_call({ :execute, data }, { pid, _ref }, state) do
     Map.to_list(data)
     |> Enum.map(fn({ node, messages }) ->
       pid = Map.get(Map.get(state, :lookup_table), node)
@@ -47,36 +42,24 @@ defmodule Virta.Instance do
         send(pid, message)
       end)
     end)
-    { :noreply, state }
+    { :reply, :ok, Map.put(state, :from, pid) }
   end
 
-  def handle_info({ :output, output }, state) do
-    :io.format("#{Map.get(output, :sum)}")
-    { :noreply, Map.put(state, :output, { :ok, output }) }
+  def handle_info({ request_id, :output, output }, state) do
+    send(Map.get(state, :from), { request_id, output })
+    { :noreply, state}
   end
 
   def handle_info({ :EXIT, _pid, reason }, state) do
-    count = Map.get(state, :count) || 0
-
-    state = unless reason == :normal do
-      Map.put(state, :output, { :error, reason })
-    else
-      state
-    end
-
-    if(length(Graph.vertices(Map.get(state, :graph))) == count + 1) do
-      IO.puts("Exiting: #{inspect Map.get(state, :output)}")
-      { :stop, :normal, state }
-    else
-      { :noreply, Map.put(state, :count, count + 1) }
-    end
+    IO.inspect(reason)
+    { :noreply, state }
   end
 
   # Private functions
 
   defp get_outport_args(graph, node, lookup_table, graph) do
     module = Module.concat("Elixir", Map.get(node, :module))
-    if(Keyword.has_key?(module.__info__(:functions), :deflate) && module.deflate) do
+    if(Keyword.has_key?(module.__info__(:functions), :final) && module.final) do
       in_edges = Graph.in_edges(graph, node)
       Enum.map(in_edges, fn(edge) ->
         Map.get(edge, :label)

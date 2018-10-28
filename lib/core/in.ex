@@ -1,23 +1,30 @@
 defmodule Virta.Core.In do
-  def loop(inport_args, outport_args, instance_pid) do
+  @inports []
+  @outports []
+
+  use Virta.Component
+
+  @impl true
+  def loop(requests, outport_args, instance_pid) do
     receive do
-      { :inflate, value } when is_map(value) ->
-        run(value, outport_args, instance_pid)
-      { port, value } ->
+      { request_id, port, value } ->
+        inport_args = Map.get(requests, request_id) || %{}
         inport_args = Map.put(inport_args, port, value)
         required_fields = Enum.map(outport_args, fn(arg) -> Map.get(arg, :to) end)
         if(required_fields |> Enum.all?(&(Map.has_key?(inport_args, &1)))) do
-          run(inport_args, outport_args, instance_pid)
+          run(request_id, inport_args, outport_args, instance_pid)
+          loop(Map.delete(requests, request_id), outport_args, instance_pid)
         else
-          loop(inport_args, outport_args, instance_pid)
+          loop(Map.put(requests, request_id, inport_args), outport_args, instance_pid)
         end
     end
   end
 
-  def run(inport_args, outport_args, _instance_pid) do
+  @impl true
+  def run(request_id, inport_args, outport_args, _instance_pid) do
     Enum.map(outport_args, fn(arg) ->
       %{ to: port, pid: pid } = arg
-      send(pid, { port , Map.get(inport_args, port) })
+      send(pid, { request_id, port , Map.get(inport_args, port) })
     end)
   end
 end

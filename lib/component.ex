@@ -1,7 +1,7 @@
 defmodule Virta.Component do
   @callback inports :: [atom]
   @callback outports :: [atom]
-  @callback run(%{}, %{}, pid) :: any
+  @callback run(any, %{}, %{}, pid) :: any
   @callback dispatch(any, %{}) :: any
   @callback loop(%{}, %{}, pid) :: any
 
@@ -16,39 +16,33 @@ defmodule Virta.Component do
       def outports, do: @outports
 
       @impl true
-      def loop(inport_args, outport_args, instance_pid) do
+      def loop(requests, outport_args, instance_pid) do
         receive do
-          { port, value } when port in @inports ->
+          { request_id, port, value } when port in @inports ->
+            inport_args = Map.get(requests, request_id) || %{}
             inport_args = Map.put(inport_args, port, value)
             if(@inports |> Enum.all?(&(Map.has_key?(inport_args, &1)))) do
-              run(inport_args, outport_args, instance_pid)
+              run(request_id, inport_args, outport_args, instance_pid)
               |> dispatch(outport_args)
+              loop(Map.delete(requests, request_id), outport_args, instance_pid)
             else
-              loop(inport_args, outport_args, instance_pid)
+              loop(Map.put(requests, request_id, inport_args), outport_args, instance_pid)
             end
         end
       end
 
       @impl true
-      def dispatch({ :noreply }, outport_args) do
+      def dispatch({ request_id, :noreply }, outport_args) do
         unless length(outport_args) == 0 do
-          raise ":normal or :deflate expected"
+          raise ":normal expected"
         end
       end
 
       @impl true
-      def dispatch({ :normal, args }, outport_args) do
+      def dispatch({ request_id, :normal, args }, outport_args) do
         Enum.map(outport_args, fn(outport_arg) ->
           %{ pid: pid, to: to, from: from } = outport_arg
-          send(pid, { to, Map.get(args, from) })
-        end)
-      end
-
-      @impl true
-      def dispatch({ :deflate, value }, outport_args) do
-        Enum.map(outport_args, fn(outport_arg) ->
-          %{ pid: pid, to: to } = outport_arg
-          send(pid, { to, value })
+          send(pid, { request_id, to, Map.get(args, from) })
         end)
       end
 

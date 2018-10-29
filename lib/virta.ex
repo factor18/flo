@@ -12,7 +12,7 @@ defmodule Virta do
   end
 
   def run do
-    graph = Graph.new(type: :directed)
+    adder = Graph.new(type: :directed)
     |> Graph.add_edge(
       %Node{ module: "Virta.Core.In", id: 0 },
       %Node{ module: "Virta.Math.Add", id: 1 },
@@ -25,38 +25,67 @@ defmodule Virta do
     )
     |> Graph.add_edge(
       %Node{ module: "Virta.Math.Add", id: 1 },
-      %Node{ module: "Virta.Math.Add", id: 3 },
-      label: %EdgeData{ from: :sum, to: :addend }
-    )
-    |> Graph.add_edge(
-      %Node{ module: "Virta.Math.Add", id: 1 },
-      %Node{ module: "Virta.Math.Add", id: 3 },
-      label: %EdgeData{ from: :sum, to: :augend }
-    )
-    |> Graph.add_edge(
-      %Node{ module: "Virta.Math.Add", id: 3 },
-      %Node{ module: "Virta.Math.Add", id: 5 },
-      label: %EdgeData{ from: :sum, to: :addend }
-    )
-    |> Graph.add_edge(
-      %Node{ module: "Virta.Math.Add", id: 3 },
-      %Node{ module: "Virta.Math.Add", id: 5 },
-      label: %EdgeData{ from: :sum, to: :augend }
-    )
-    |> Graph.add_edge(
-      %Node{ module: "Virta.Math.Add", id: 5 },
-      %Node{ module: "Virta.Core.Out", id: 7 },
+      %Node{ module: "Virta.Core.Out", id: 2 },
       label: %EdgeData{ from: :sum, to: :sum }
     )
 
-    unless Graph.is_cyclic?(graph) do
-      name = "adder"
-      Registry.register(name, graph)
+    multiplier = Graph.new(type: :directed)
+    |> Graph.add_edge(
+      %Node{ module: "Virta.Core.In", id: 0 },
+      %Node{ module: "Virta.Math.Multiply", id: 1 },
+      label: %EdgeData{ from: :multiplicand, to: :multiplicand }
+    )
+    |> Graph.add_edge(
+      %Node{ module: "Virta.Core.In", id: 0 },
+      %Node{ module: "Virta.Math.Multiply", id: 1 },
+      label: %EdgeData{ from: :multiplier, to: :multiplier }
+    )
+    |> Graph.add_edge(
+      %Node{ module: "Virta.Math.Multiply", id: 1 },
+      %Node{ module: "Virta.Core.Out", id: 2 },
+      label: %EdgeData{ from: :product, to: :product }
+    )
+
+    complex_graph = Graph.new(type: :directed)
+    |> Graph.add_edge(
+      %Node{ module: "Virta.Core.In", id: 0 },
+      %Node{ module: "Virta.Core.Workflow", id: 1 },
+      label: %EdgeData{ from: :augend, to: :augend }
+    )
+    |> Graph.add_edge(
+      %Node{ module: "Virta.Core.In", id: 0 },
+      %Node{ module: "Virta.Core.Workflow", id: 1 },
+      label: %EdgeData{ from: :addend, to: :addend }
+    )
+    |> Graph.add_edge(
+      %Node{ module: "Virta.Core.Workflow", id: 1 },
+      %Node{ module: "Virta.Core.Workflow", id: 2 },
+      label: %EdgeData{ from: :sum, to: :multiplicand }
+    )
+    |> Graph.add_edge(
+      %Node{ module: "Virta.Core.Workflow", id: 1 },
+      %Node{ module: "Virta.Core.Workflow", id: 2 },
+      label: %EdgeData{ from: :sum, to: :multiplier }
+    )
+    |> Graph.add_edge(
+      %Node{ module: "Virta.Core.Workflow", id: 2 },
+      %Node{ module: "Virta.Core.Out", id: 3 },
+      label: %EdgeData{ from: :product, to: :product }
+    )
+
+    unless Graph.is_cyclic?(adder) do
+      Registry.register("adder", adder)
+      Registry.register("multiplier", multiplier)
+      Registry.register("complex_graph", complex_graph)
+
+      name = "complex_graph"
       Registry.get(name)
 
-      Enum.each(1..100000, fn i ->
+      Enum.each(1..10000, fn i ->
         data = %{
-          %Node{ module: "Virta.Core.In", id: 0 } => [{ i, :augend, i }, { i, :addend,  i*2 }]
+          %Node{ module: "Virta.Core.In", id: 0 } => [{ i, :augend, i }, { i, :addend, i*2 }],
+          %Node{ module: "Virta.Core.Workflow", id: 1 } => [{ i, :graph, "adder" }],
+          %Node{ module: "Virta.Core.Workflow", id: 2 } => [{ i, :graph, "multiplier" }]
         }
 
         :poolboy.transaction(String.to_existing_atom(name), fn (server) ->
@@ -65,7 +94,6 @@ defmodule Virta do
             message -> IO.inspect(message)
           end
         end)
-
       end)
     else
       raise "Graph is expected to be acyclic"

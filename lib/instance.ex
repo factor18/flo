@@ -11,6 +11,14 @@ defmodule Virta.Instance do
     GenServer.call(server, { :execute, data })
   end
 
+  def inports(server) do
+    GenServer.call(server, { :inports })
+  end
+
+  def outports(server) do
+    GenServer.call(server, { :outports })
+  end
+
   # Server Callbacks
 
   def init({ :ok, graph }) do
@@ -41,6 +49,23 @@ defmodule Virta.Instance do
       end)
     end)
     { :reply, :ok, Map.put(state, :from, pid) }
+  end
+
+  def handle_call({ :inports }, _from, state) do
+    graph = Map.get(state, :graph)
+    vertex = graph
+    |> Graph.topsort
+    |> Enum.at(0)
+    { :reply, Graph.out_edges(graph, vertex), state }
+  end
+
+  def handle_call({ :outports }, _from, state) do
+    graph = Map.get(state, :graph)
+    vertex = graph
+    |> Graph.topsort
+    |> Enum.reverse
+    |> Enum.at(0)
+    { :reply, Graph.in_edges(graph, vertex), state }
   end
 
   def handle_info({ request_id, :output, output }, state) do

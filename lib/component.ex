@@ -2,8 +2,10 @@ defmodule Virta.Component do
   @callback inports :: [atom]
   @callback outports :: [atom]
   @callback run(any, %{}, %{}, pid) :: any
+  @callback run(any, %{}, %{}, pid, %{}, pid) :: any
   @callback dispatch(any, %{}) :: any
   @callback loop(%{}, %{}, pid) :: any
+  @optional_callbacks run: 6
 
   defmacro __using__(_) do
     quote do

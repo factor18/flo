@@ -7,33 +7,21 @@ defmodule Virta.Core.Workflow do
   use Virta.Component
 
   @impl true
-  def loop(requests, outport_args, instance_pid, request_inports \\ %{}, request_graph_name \\ %{}) do
+  def loop(inport_args, outport_args, instance_pid, rinports \\ nil, rgraph_name \\ nil) do
     receive do
       { request_id, port, value } ->
         { inports, graph_name } = if(port == :graph) do
           get_ports_from_graph(value)
         else
-          {
-            Map.get(request_inports, request_id),
-            Map.get(request_graph_name, request_id)
-          }
+          { rinports, rgraph_name }
         end
-        inport_args = Map.get(requests, request_id) || %{}
         inport_args = Map.put(inport_args, port, value)
-        request_inports = Map.put(request_inports, request_id, inports)
-        request_graph_name = Map.put(request_graph_name, request_id, graph_name)
         required_fields = check_required_fields(inport_args, inports || [])
         if(required_fields |> Enum.all?(&(Map.has_key?(inport_args, &1)))) do
           run(request_id, inport_args, outport_args, instance_pid, inports, graph_name)
-          loop(
-            Map.delete(requests, request_id),
-            outport_args,
-            instance_pid,
-            Map.delete(request_inports, request_id),
-            Map.delete(request_graph_name, request_id)
-          )
+          loop(%{}, outport_args, instance_pid, inports, graph_name)
         else
-          loop(Map.put(requests, request_id, inport_args), outport_args, instance_pid, request_inports, request_graph_name)
+          loop(inport_args, outport_args, instance_pid, inports, graph_name)
         end
     end
   end

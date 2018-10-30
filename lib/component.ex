@@ -18,17 +18,16 @@ defmodule Virta.Component do
       def outports, do: @outports
 
       @impl true
-      def loop(requests, outport_args, instance_pid) do
+      def loop(inport_args, outport_args, instance_pid) do
         receive do
           { request_id, port, value } when port in @inports ->
-            inport_args = Map.get(requests, request_id) || %{}
             inport_args = Map.put(inport_args, port, value)
             if(@inports |> Enum.all?(&(Map.has_key?(inport_args, &1)))) do
               run(request_id, inport_args, outport_args, instance_pid)
               |> dispatch(outport_args)
-              loop(Map.delete(requests, request_id), outport_args, instance_pid)
+              loop(%{}, outport_args, instance_pid)
             else
-              loop(Map.put(requests, request_id, inport_args), outport_args, instance_pid)
+              loop(inport_args, outport_args, instance_pid)
             end
         end
       end

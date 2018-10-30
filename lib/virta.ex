@@ -49,26 +49,26 @@ defmodule Virta do
     complex_graph = Graph.new(type: :directed)
     |> Graph.add_edge(
       %Node{ module: "Virta.Core.In", id: 0 },
-      %Node{ module: "Virta.Core.Workflow", id: 1 },
+      %Node{ module: "Virta.Core.Workflow", id: 1, ref: "adder" },
       label: %EdgeData{ from: :augend, to: :augend }
     )
     |> Graph.add_edge(
       %Node{ module: "Virta.Core.In", id: 0 },
-      %Node{ module: "Virta.Core.Workflow", id: 1 },
+      %Node{ module: "Virta.Core.Workflow", id: 1, ref: "adder" },
       label: %EdgeData{ from: :addend, to: :addend }
     )
     |> Graph.add_edge(
-      %Node{ module: "Virta.Core.Workflow", id: 1 },
-      %Node{ module: "Virta.Core.Workflow", id: 2 },
+      %Node{ module: "Virta.Core.Workflow", id: 1, ref: "adder" },
+      %Node{ module: "Virta.Core.Workflow", id: 2, ref: "multiplier" },
       label: %EdgeData{ from: :sum, to: :multiplicand }
     )
     |> Graph.add_edge(
-      %Node{ module: "Virta.Core.Workflow", id: 1 },
-      %Node{ module: "Virta.Core.Workflow", id: 2 },
+      %Node{ module: "Virta.Core.Workflow", id: 1, ref: "adder" },
+      %Node{ module: "Virta.Core.Workflow", id: 2, ref: "multiplier" },
       label: %EdgeData{ from: :sum, to: :multiplier }
     )
     |> Graph.add_edge(
-      %Node{ module: "Virta.Core.Workflow", id: 2 },
+      %Node{ module: "Virta.Core.Workflow", id: 2, ref: "multiplier" },
       %Node{ module: "Virta.Core.Out", id: 3 },
       label: %EdgeData{ from: :product, to: :product }
     )
@@ -83,9 +83,7 @@ defmodule Virta do
 
       Enum.each(1..10000, fn i ->
         data = %{
-          %Node{ module: "Virta.Core.In", id: 0 } => [{ i, :augend, i }, { i, :addend, i*2 }],
-          %Node{ module: "Virta.Core.Workflow", id: 1 } => [{ i, :graph, "adder" }],
-          %Node{ module: "Virta.Core.Workflow", id: 2 } => [{ i, :graph, "multiplier" }]
+          %Node{ module: "Virta.Core.In", id: 0 } => [{ i, :augend, i }, { i, :addend, i*2 }]
         }
 
         :poolboy.transaction(String.to_existing_atom(name), fn (server) ->

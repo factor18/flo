@@ -77,17 +77,28 @@ defmodule Virta.Instance do
 
   defp get_outport_args(graph, node, lookup_table, graph) do
     module = Module.concat("Elixir", Map.get(node, :module))
-    if(Keyword.has_key?(module.__info__(:functions), :final) && module.final) do
-      in_edges = Graph.in_edges(graph, node)
-      Enum.map(in_edges, fn(edge) ->
-        Map.get(edge, :label)
-      end)
-    else
-      out_edges = Graph.out_edges(graph, node)
-      Enum.map(out_edges, fn(edge) ->
-        %{ v2: to_node, label: label } = edge
-        Map.put(label, :pid, Map.get(lookup_table, to_node))
-      end)
+    cond do
+      Keyword.has_key?(module.__info__(:functions), :final) && module.final ->
+        in_edges = Graph.in_edges(graph, node)
+        Enum.map(in_edges, fn(edge) ->
+          Map.get(edge, :label)
+        end)
+      Keyword.has_key?(module.__info__(:functions), :workflow) && module.workflow ->
+        in_edges = Graph.in_edges(graph, node)
+        out_edges = Graph.out_edges(graph, node)
+        Enum.map(in_edges, fn(edge) ->
+          %{ v2: to_node, label: label } = edge
+          Map.put(label, :ref, to_node)
+        end) ++ Enum.map(out_edges, fn(edge) ->
+          %{ v2: to_node, label: label } = edge
+          Map.put(label, :pid, Map.get(lookup_table, to_node))
+        end)
+      true ->
+        out_edges = Graph.out_edges(graph, node)
+        Enum.map(out_edges, fn(edge) ->
+          %{ v2: to_node, label: label } = edge
+          Map.put(label, :pid, Map.get(lookup_table, to_node))
+        end)
     end
   end
 end

@@ -3,24 +3,100 @@ defmodule Virta.Instance do
 
   # Client API's
 
+  @doc false
+  def child_spec(arg) do
+    super(arg)
+  end
+
+  @doc false
   def start_link(graph) do
     GenServer.start_link(__MODULE__, { :ok, graph })
   end
 
+  @doc """
+  Sends the initial messages to the nodes in the workflow to start the execution.
+
+  The data should be a Map with the keys as the %Virta.Node{} and values as a list of messages with
+  the format `{ request_id, port, value }` for the respective node.
+
+  Example:
+  ```elixir
+  data = %{
+    %Node{ module: Virta.Core.In, id: 0 } => [
+      { 1, :augend, 10 }, { 1, :addend, 20 }
+    ]
+  }
+  ```
+
+  Virta creates a pool of workers for the workflow using
+  [poolboy](https://github.com/devinus/poolboy) in order to provide concurrency. We can request for
+  a worker and execute the workflow with the above data as follows:
+
+  ```elixir
+  :poolboy.transaction(String.to_existing_atom("adder"), fn (server) ->
+    Virta.Instance.execute(server, data)
+    receive do
+      message -> IO.inspect(message)
+      # {1, %{sum: 30}}
+    end
+  end)
+  ```
+  """
   def execute(server, data) do
     GenServer.call(server, { :execute, data })
   end
 
+  @doc """
+  Returns the list of out-edges from the `Virta.Core.In` component.
+
+  Example:
+  ```elixir
+  Virta.Instance.inports(server)
+  #=>
+  [
+    %Graph.Edge{
+      label: %Virta.EdgeData{from: :addend, to: :addend},
+      v1: %Virta.Node{id: 0, module: Virta.Core.In, ref: nil},
+      v2: %Virta.Node{id: 1, module: Virta.Core.Workflow, ref: "adder"},
+      weight: 1
+    },
+    %Graph.Edge{
+      label: %Virta.EdgeData{from: :augend, to: :augend},
+      v1: %Virta.Node{id: 0, module: Virta.Core.In, ref: nil},
+      v2: %Virta.Node{id: 1, module: Virta.Core.Workflow, ref: "adder"},
+      weight: 1
+    }
+  ]
+  ```
+  """
   def inports(server) do
     GenServer.call(server, { :inports })
   end
 
+  @doc """
+  Returns the list of in-edges to the `Virta.Core.Out` component.
+
+  Example:
+  ```elixir
+  Virta.Instance.outports(server)
+  #=>
+  [
+    %Graph.Edge{
+      label: %Virta.EdgeData{from: :product, to: :output},
+      v1: %Virta.Node{id: 2, module: Virta.Core.Workflow, ref: "multiplier"},
+      v2: %Virta.Node{id: 3, module: Virta.Core.Out, ref: nil},
+      weight: 1
+    }
+  ]
+  ```
+  """
   def outports(server) do
     GenServer.call(server, { :outports })
   end
 
   # Server Callbacks
 
+  @doc false
   def init({ :ok, graph }) do
     lookup_table = graph
     |> Graph.topsort

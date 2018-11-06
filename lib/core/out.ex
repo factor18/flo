@@ -1,9 +1,18 @@
 defmodule Virta.Core.Out do
+  @moduledoc """
+  Serves as the output collection point for a workflow.
+
+  Any workflow which needs to return a value (or values) needs to use `Virta.Core.Out` as the last
+  node in the graph. It acts as a collector and sends a message to the invoking process with the
+  output.
+  """
+
   @inports []
   @outports []
 
   use Virta.Component
 
+  @doc false
   def final do true end
 
   @impl true

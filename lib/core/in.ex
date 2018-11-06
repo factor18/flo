@@ -1,4 +1,13 @@
 defmodule Virta.Core.In do
+  @moduledoc """
+  Serves as an entry point for a workflow.
+
+  `Virta.Core.In` is used internally for workflow port discovery, which enables invoking a workflow
+  from another workflow.
+
+  All workflows must use this component.
+  """
+
   @inports []
   @outports []
 

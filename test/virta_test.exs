@@ -80,6 +80,8 @@ defmodule VirtaTest do
     }
 
     :poolboy.transaction(String.to_existing_atom(name), fn (server) ->
+      IO.inspect Instance.inports(server)
+      IO.inspect Instance.outports(server)
       Instance.execute(server, data)
       receive do
         message -> assert message == { 1, %{ output: 9 } }

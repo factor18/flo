@@ -1,7 +1,7 @@
 # Virta
+Flow based programming for elixir
 
-### Description
-FBP-ish implementation in elixir
+[source](https://github.com/sarat1669/virta) | [documentation](https://hexdocs.pm/virta/Virta.html)
 
 ### Installation
 Virta requires Elixir v1.6. Just add :virta to your list of dependencies in mix.exs:
@@ -11,17 +11,24 @@ def deps do
 end
 ```
 
-### Architecture
-Virta is made up of the following
+### Usage
+Virta is a Flow-Based Programming environment for Elixir. In flow-based programs, the logic of your application is defined as an acyclic graph. The nodes of the graph are instances of components, the edges define the connections between them.
 
-#### Component
-The core of virta is a Component. The `Component` behaviour abstracts out the message passing and messages aggregation.
+The components react to the incoming mesages. When a component receives a message, it performs a predefined operation and sends its result as a message to its outports.
+
+A graph needs to be registered on the registry before it can be executed. A registered graph is called a Workflow.
+
+#### Creating components
+The components are modules which implement the `Virta.Component` behaviour.
+
+A component communicates with other components using ports. The component waits for message to arrive on each inport. Once messages are received on all the in-ports, it executes the component functional logic.
+
+`Virta.Component` also provides a `__using__` macro which injects the bootstrap code for creating a component.
 
 Lets look at a code example:
-Here is a simple component which inspects the data passed to it.
 
 ```elixir
-defmodule Virta.Sample.Echo do
+defmodule Echo do
   @inports [:data]
   @outports []
 
@@ -34,92 +41,65 @@ defmodule Virta.Sample.Echo do
     { request_id, :noreply }
   end
 end
-
-# Start the component
-{:ok, pid} = Task.start_link(Virta.Sample.Echo, :loop, [%{}, %{}, self()])
-
-# Send sample data
-send(pid, {1, :data, 10 })
-#=> 10
 ```
 
-Virta provides three special components `Virta.Core.In`, `Virta.Core.Out` and `Virta.Core.Workflow` which have special use cases which are discussed below.
+Here the component doesn't have any outports, hence it returns `{ request_id, :noreply }`
+If the component has outports, it needs to return `{ request_id, :reply, value }`. Where value is a Map with outport names as the keys with their respective values. Lets see this in action:
 
-#### Workflow
-Components can be connected to each other to form a workflow using a Graph.
+```elixir
+defmodule Add do
+  @inports [ :addend, :augend ]
+  @outports [ :sum ]
 
-Each `Component` in a workflow is called a `Node` and is represented using a struct `Virta.Node` And connections between nodes is called an `Edge` and is represented using a struct `Virta.EdgeData`.
+  use Virta.Component
 
-A sample node looks like:
-`%Node{ module: "Virta.Sample.Echo", id: 0 }`
-`module` represents the `component` and `id` is used to uniquely identify the node in the graph.
+  @impl true
+  def run(request_id, inport_args, _outport_args, _instance_pid) do
+    value = Map.get(inport_args, :augend) + Map.get(inport_args, :addend)
+    { request_id, :reply, %{ sum: value } }
+  end
+end
+```
 
-Lets look at a sample workflow:
+Once the execution is done, the messages are passed on to the outports (if any).
+
+Virta provides three in-built components which are useful for creating workflows.
+* `Virta.Core.In`
+* `Virta.Core.Out`
+* `Virta.Core.Workflow`
+
+The purpose of these components are discussed in the below sections.
+
+#### Creating workflows
+Components can be connected to each other to form a an acyclic graph (check [libgraph](https://hexdocs.pm/libgraph/api-reference.html) for more details on the implementation).
+
+A node in a is represented by `%Virta.Node{}` and the label of the edge connecting the nodes should be `%Virta.EdgeData{}`, which has the ports to which the edge needs to be connected.
+
+Lets look at a simple example:
 
 ```elixir
 alias Virta.Node
 alias Virta.EdgeData
 
 workflow = Graph.new(type: :directed)
+|> Graph.add_vertex(%Node{ module: Virta.Core.In, id: 0 })
+|> Graph.add_vertex(%Node{ module: Echo, id: 1 })
 |> Graph.add_edge(
   %Node{ module: Virta.Core.In, id: 0 },
-  %Node{ module: "Virta.Sample.Echo", id: 1 },
+  %Node{ module: Echo, id: 1 },
   label: %EdgeData{ from: :data, to: :data }
 )
 ```
 
-Here `%EdgeData{ from: :data, to: :data }` states that the port :data from `Virta.Core.In` is connected to the port :data of `Virta.Sample.Echo`
+###### NOTE:
+* Adding a vertex is optional. A graph can be purely constructed using edges.
+* Here we are using an in-built component `Virta.Core.In`. Every workflow should have this component as the entry point.
+* `Virta.Core.In` is being used internally for workflow port discovery, which enables invoking a workflow from another workflow (discussed in the sections below).
+* Any workflow which needs to return a value (or values) needs to use `Virta.Core.Out` as the last node in the graph. It acts as a collector and sends a message to the invoking process with the output.
 
-A workflow defined in a graph needs to be converted into an actual workflow before it can be used. It can be achieved using `Virta.Instance`.
-
-#### Instance
-`Virta.Instance` is implemented using `GenServer`
-It takes a graph and initializes the nodes as processes. And establishes the connections between the processes.
-
-It provides a `execute` method to send messages to the workflow components.
-
-Lets see a code example for the workflow which we created earlier
+Lets look at a graph which returns a value:
 
 ```elixir
-alias Virta.Node
-alias Virta.EdgeData
-alias Virta.Instance
-
-sample = Graph.new(type: :directed)
-|> Graph.add_edge(
-  %Node{ module: Virta.Core.In, id: 0 },
-  %Node{ module: "Virta.Sample.Echo", id: 1 },
-  label: %EdgeData{ from: :data, to: :data }
-)
-
-# Start the GenServer
-{ :ok, pid } = Instance.start_link(sample)
-
-data = %{
-  %Node{ module: Virta.Core.In, id: 0 } => [{ 1, :data, 10 }]
-}
-
-# Send the message with value `10` to port `:data` with request_id `1`
-Instance.execute(pid, data)
-#=> 10
-#=> :ok
-```
-
-Here the component `Virta.Core.In` passes the data from its inport `:data` to the the inport of `Virta.Sample.Echo`. Once the data is received, `Virta.Sample.Echo` executes the `run` method, which prints `10`
-
-The component `Virta.Core.In` is used to represent the inports of the workflow.
-
-#### Registry
-`Virta.Registry` is implemented using `GenServer`
-It takes a name and a graph and creates a pool of instances using :poolboy, which can then be used for concurrency.
-
-Lets create a new workflow which does more than just echo-ing:
-```elixir
-alias Virta.Node
-alias Virta.Registry
-alias Virta.EdgeData
-alias Virta.Instance
-
 adder = Graph.new(type: :directed)
 |> Graph.add_edge(
   %Node{ module: Virta.Core.In, id: 0 },
@@ -134,33 +114,32 @@ adder = Graph.new(type: :directed)
 |> Graph.add_edge(
   %Node{ module: Virta.Math.Add, id: 1 },
   %Node{ module: Virta.Core.Out, id: 2 },
-  label: %EdgeData{ from: :sum, to: :sum }
+  label: %EdgeData{ from: :sum, to: :output }
 )
-
-# Register the graph with the name 'adder'
-Registry.register("adder", adder)
 ```
 
-Here we are using `Virta.Math.Add` component which has two inports `:addend` and `:augend` and has one outport `:sum` which all expect a number
-
-When both the ports receive the message, the sum of the two numbers is calculated and a message is dispatched on to the ports connected to the outport `:sum`
-
-The component `Virta.Core.Out` waits for messages and then sends a message to the process which invoked the workflow.
-
-Lets see this in action
+Once a graph is created, it needs to be registered to create a workflow. Lets look at how this is done:
 
 ```elixir
-Registry.get("adder")
-#=> #PID<0.167.0>
+Virta.Registry.register("adder", adder)
+```
 
+#### Executing the workflow
+The input for a workflow should be a list of messages with the format `{ request_id, port, value }` for the input node as follows:
+
+```elixir
 data = %{
   %Node{ module: Virta.Core.In, id: 0 } => [
     { 1, :augend, 10 }, { 1, :addend, 20 }
   ]
 }
+```
 
+Virta creates a pool of workers for the workflow using [poolboy](https://github.com/devinus/poolboy) in order to provide concurrency. We can request for a worker and execute the workflow with the above data as follows:
+
+```elixir
 :poolboy.transaction(String.to_existing_atom("adder"), fn (server) ->
-  Instance.execute(server, data)
+  Virta.Instance.execute(server, data)
   receive do
     message -> IO.inspect(message)
     # {1, %{sum: 30}}
@@ -168,14 +147,13 @@ data = %{
 end)
 ```
 
-### Invoking a workflow within a workflow:
-`Virta.Core.Worflow` is a special component which allows us to invoke a different workflow from the current workflow. This allows us to reuse workflows.
+#### Invoking a workflow within a workflow:
+Virta.Core.Worflow is a special component which allows us to invoke a different workflow from the current workflow. This allows us to reuse workflows.
 
-A workflow node can be represented as
-`%Node{ module: Virta.Core.Workflow, id: 1, ref: "adder" }`
-Notice the `:ref` property. It refers to the registered workflow with the name `adder`.
+A workflow node can be represented as %Node{ module: Virta.Core.Workflow, id: 1, ref: "adder" } Notice the :ref property. It refers to the registered workflow with the name adder.
 
 Lets see a code example for a complex worflow which invokes other workflows:
+
 ```elixir
 alias Virta.Node
 alias Virta.Registry
@@ -246,18 +224,17 @@ complex_graph = Graph.new(type: :directed)
 Registry.register("adder", adder)
 Registry.register("multiplier", multiplier)
 Registry.register("complex_graph", complex_graph)
+```
 
-name = "complex_graph"
-Registry.get(name)
-#=> #PID<0.572.0>
-
+This can then be executed as follows:
+```elixir
 data = %{
   %Node{ module: Virta.Core.In, id: 0 } => [
     { 1, :augend, 10 }, { 1, :addend, 20 }
   ]
 }
 
-:poolboy.transaction(String.to_existing_atom(name), fn (server) ->
+:poolboy.transaction(String.to_existing_atom("complex_graph"), fn (server) ->
   Instance.execute(server, data)
   receive do
     message -> IO.inspect(message)
@@ -268,7 +245,7 @@ end)
 
 ### Status
 
-The project is still under development. This can be considered just as a 'proof of concept'.
+The project is under active development and not production ready yet.
 
 ### Contributing
 Request a new feature by creating an issue or create a pull request with new features or fixes.

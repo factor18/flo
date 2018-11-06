@@ -135,16 +135,10 @@ data = %{
 }
 ```
 
-Virta creates a pool of workers for the workflow using [poolboy](https://github.com/devinus/poolboy) in order to provide concurrency. We can request for a worker and execute the workflow with the above data as follows:
+Virta creates a pool of workers for the workflow using [poolboy](https://github.com/devinus/poolboy) in order to provide concurrency. We can request for a worker and execute the workflow with the above data using `Virta.Executor` as follows:
 
 ```elixir
-:poolboy.transaction(String.to_existing_atom("adder"), fn (server) ->
-  Virta.Instance.execute(server, data)
-  receive do
-    message -> IO.inspect(message)
-    # {1, %{sum: 30}}
-  end
-end)
+{ requst_id, output } = Virta.Executor.call("adder", data)
 ```
 
 #### Invoking a workflow within a workflow:
@@ -158,7 +152,6 @@ Lets see a code example for a complex worflow which invokes other workflows:
 alias Virta.Node
 alias Virta.Registry
 alias Virta.EdgeData
-alias Virta.Instance
 
 adder = Graph.new(type: :directed)
 |> Graph.add_edge(
@@ -234,13 +227,7 @@ data = %{
   ]
 }
 
-:poolboy.transaction(String.to_existing_atom("complex_graph"), fn (server) ->
-  Instance.execute(server, data)
-  receive do
-    message -> IO.inspect(message)
-    # {1, %{product: 900}}
-  end
-end)
+{ requst_id, output } = Virta.Executor.call("complex_graph", data)
 ```
 
 ### Status

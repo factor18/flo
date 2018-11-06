@@ -5,7 +5,6 @@ defmodule VirtaTest do
   alias Virta.Node
   alias Virta.Registry
   alias Virta.EdgeData
-  alias Virta.Instance
 
   test "sanity" do
     adder = Graph.new(type: :directed)
@@ -79,13 +78,6 @@ defmodule VirtaTest do
       %Node{ module: Virta.Core.In, id: 0 } => [{ 1, :augend, 1 }, { 1, :addend, 2 }]
     }
 
-    :poolboy.transaction(String.to_existing_atom(name), fn (server) ->
-      IO.inspect Instance.inports(server)
-      IO.inspect Instance.outports(server)
-      Instance.execute(server, data)
-      receive do
-        message -> assert message == { 1, %{ output: 9 } }
-      end
-    end)
+    Virta.Executor.call(name, data)
   end
 end

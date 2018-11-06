@@ -10,7 +10,7 @@ defmodule Virta do
   The components are elixir modules which implement the `Virta.Component` behaviour.
 
   A graph needs to be registered with a name on `Virta.Registry` before it can be executed. A
-  registered graph is called a Workflow. `Virta.Instance` API provides methods to interact with
+  registered graph is called a Workflow. `Virta.Executor` API provides methods to interact with
   the workflow.
   """
 

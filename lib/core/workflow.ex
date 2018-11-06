@@ -89,13 +89,7 @@ defmodule Virta.Core.Workflow do
     ]
   }
 
-  :poolboy.transaction(String.to_existing_atom("complex_graph"), fn (server) ->
-    Instance.execute(server, data)
-    receive do
-      message -> IO.inspect(message)
-      # {1, %{product: 900}}
-    end
-  end)
+  { requst_id, output } = Virta.Executor.call("complex_graph", data)
   ```
   """
   @inports []
@@ -148,18 +142,15 @@ defmodule Virta.Core.Workflow do
       Map.put(acc, %Node{ module: Virta.Core.In, id: 0 }, messages)
     end)
 
-    :poolboy.transaction(String.to_existing_atom(ref), fn (server) ->
-      Instance.execute(server, data)
-      receive do
-        { _request_id, response } ->
-          outport_args
-          |> Enum.filter(fn arg -> Map.has_key?(arg, :pid) end)
-          |> Enum.map(fn(arg) ->
-            %{ from: from, to: to, pid: pid } = arg
-            send(pid, { request_id, to , Map.get(response, from) })
-          end)
-      end
+    { _requst_id, response } = Virta.Executor.call(ref, data)
+    outport_args
+    |> Enum.filter(fn arg -> Map.has_key?(arg, :pid) end)
+    |> Enum.map(fn(arg) ->
+      %{ from: from, to: to, pid: pid } = arg
+      send(pid, { request_id, to , Map.get(response, from) })
     end)
+
+    { request_id, :noreply }
   end
 
   defp get_ports_from_graph(value) do

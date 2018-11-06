@@ -9,7 +9,7 @@ defmodule Virta.Pool do
     [
       {:name, {:local, String.to_atom(name)}},
       {:worker_module, Virta.Instance},
-      {:size, 50},
+      {:size, System.schedulers_online() },
       {:max_overflow, 0}
     ]
   end

@@ -25,5 +25,6 @@ defmodule Virta.Core.In do
       %{ to: port, pid: pid } = arg
       send(pid, { request_id, port , Map.get(inport_args, port) })
     end)
+    { request_id, :noreply }
   end
 end

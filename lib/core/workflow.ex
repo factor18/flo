@@ -44,8 +44,8 @@ defmodule Virta.Core.Workflow do
     data = message_configs
     |> Enum.reduce(%{}, fn({ _from, to}, acc) ->
       value = Map.get(inport_args, to)
-      messages = (Map.get(acc, %Node{ module: "Virta.Core.In", id: 0 }) || []) ++ [{ request_id, to, value }]
-      Map.put(acc, %Node{ module: "Virta.Core.In", id: 0 }, messages)
+      messages = (Map.get(acc, %Node{ module: Virta.Core.In, id: 0 }) || []) ++ [{ request_id, to, value }]
+      Map.put(acc, %Node{ module: Virta.Core.In, id: 0 }, messages)
     end)
 
     :poolboy.transaction(String.to_existing_atom(ref), fn (server) ->

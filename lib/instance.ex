@@ -27,8 +27,7 @@ defmodule Virta.Instance do
     |> Enum.reverse
     |> Enum.reduce(Map.new(), fn(node, lookup_table) ->
       outport_args = get_outport_args(graph, node, lookup_table, graph)
-      module = Module.concat("Elixir", Map.get(node, :module))
-      { :ok, pid } = Task.start_link(module, :loop, [ %{}, outport_args, self() ])
+      { :ok, pid } = Task.start_link(Map.get(node, :module), :loop, [ %{}, outport_args, self() ])
       Map.put(lookup_table, node, pid)
     end)
 
@@ -76,7 +75,7 @@ defmodule Virta.Instance do
   # Private functions
 
   defp get_outport_args(graph, node, lookup_table, graph) do
-    module = Module.concat("Elixir", Map.get(node, :module))
+    module = Map.get(node, :module)
     cond do
       Keyword.has_key?(module.__info__(:functions), :final) && module.final ->
         in_edges = Graph.in_edges(graph, node)

@@ -54,7 +54,7 @@ Lets look at a sample workflow:
 
     workflow = Graph.new(type: :directed)
     |> Graph.add_edge(
-      %Node{ module: "Virta.Core.In", id: 0 },
+      %Node{ module: Virta.Core.In, id: 0 },
       %Node{ module: "Virta.Sample.Echo", id: 1 },
       label: %EdgeData{ from: :data, to: :data }
     )
@@ -79,7 +79,7 @@ alias Virta.Instance
 
 sample = Graph.new(type: :directed)
 |> Graph.add_edge(
-  %Node{ module: "Virta.Core.In", id: 0 },
+  %Node{ module: Virta.Core.In, id: 0 },
   %Node{ module: "Virta.Sample.Echo", id: 1 },
   label: %EdgeData{ from: :data, to: :data }
 )
@@ -88,7 +88,7 @@ sample = Graph.new(type: :directed)
 { :ok, pid } = Instance.start_link(sample)
 
 data = %{
-  %Node{ module: "Virta.Core.In", id: 0 } => [{ 1, :data, 10 }]
+  %Node{ module: Virta.Core.In, id: 0 } => [{ 1, :data, 10 }]
 }
 
 # Send the message with value `10` to port `:data` with request_id `1`
@@ -114,18 +114,18 @@ alias Virta.Instance
 
 adder = Graph.new(type: :directed)
 |> Graph.add_edge(
-  %Node{ module: "Virta.Core.In", id: 0 },
-  %Node{ module: "Virta.Math.Add", id: 1 },
+  %Node{ module: Virta.Core.In, id: 0 },
+  %Node{ module: Virta.Math.Add, id: 1 },
   label: %EdgeData{ from: :addend, to: :addend }
 )
 |> Graph.add_edge(
-  %Node{ module: "Virta.Core.In", id: 0 },
-  %Node{ module: "Virta.Math.Add", id: 1 },
+  %Node{ module: Virta.Core.In, id: 0 },
+  %Node{ module: Virta.Math.Add, id: 1 },
   label: %EdgeData{ from: :augend, to: :augend }
 )
 |> Graph.add_edge(
-  %Node{ module: "Virta.Math.Add", id: 1 },
-  %Node{ module: "Virta.Core.Out", id: 2 },
+  %Node{ module: Virta.Math.Add, id: 1 },
+  %Node{ module: Virta.Core.Out, id: 2 },
   label: %EdgeData{ from: :sum, to: :sum }
 )
 
@@ -146,7 +146,7 @@ Registry.get("adder")
 #=> #PID<0.167.0>
 
 data = %{
-  %Node{ module: "Virta.Core.In", id: 0 } => [
+  %Node{ module: Virta.Core.In, id: 0 } => [
     { 1, :augend, 10 }, { 1, :addend, 20 }
   ]
 }
@@ -164,7 +164,7 @@ end)
 `Virta.Core.Worflow` is a special component which allows us to invoke a different workflow from the current workflow. This allows us to reuse workflows.
 
 A workflow node can be represented as
-`%Node{ module: "Virta.Core.Workflow", id: 1, ref: "adder" }`
+`%Node{ module: Virta.Core.Workflow, id: 1, ref: "adder" }`
 Notice the `:ref` property. It refers to the registered workflow with the name `adder`.
 
 Lets see a code example for a complex worflow which invokes other workflows:
@@ -176,62 +176,62 @@ alias Virta.Instance
 
 adder = Graph.new(type: :directed)
 |> Graph.add_edge(
-  %Node{ module: "Virta.Core.In", id: 0 },
-  %Node{ module: "Virta.Math.Add", id: 1 },
+  %Node{ module: Virta.Core.In, id: 0 },
+  %Node{ module: Virta.Math.Add, id: 1 },
   label: %EdgeData{ from: :addend, to: :addend }
 )
 |> Graph.add_edge(
-  %Node{ module: "Virta.Core.In", id: 0 },
-  %Node{ module: "Virta.Math.Add", id: 1 },
+  %Node{ module: Virta.Core.In, id: 0 },
+  %Node{ module: Virta.Math.Add, id: 1 },
   label: %EdgeData{ from: :augend, to: :augend }
 )
 |> Graph.add_edge(
-  %Node{ module: "Virta.Math.Add", id: 1 },
-  %Node{ module: "Virta.Core.Out", id: 2 },
+  %Node{ module: Virta.Math.Add, id: 1 },
+  %Node{ module: Virta.Core.Out, id: 2 },
   label: %EdgeData{ from: :sum, to: :sum }
 )
 
 multiplier = Graph.new(type: :directed)
 |> Graph.add_edge(
-  %Node{ module: "Virta.Core.In", id: 0 },
-  %Node{ module: "Virta.Math.Multiply", id: 1 },
+  %Node{ module: Virta.Core.In, id: 0 },
+  %Node{ module: Virta.Math.Multiply, id: 1 },
   label: %EdgeData{ from: :multiplicand, to: :multiplicand }
 )
 |> Graph.add_edge(
-  %Node{ module: "Virta.Core.In", id: 0 },
-  %Node{ module: "Virta.Math.Multiply", id: 1 },
+  %Node{ module: Virta.Core.In, id: 0 },
+  %Node{ module: Virta.Math.Multiply, id: 1 },
   label: %EdgeData{ from: :multiplier, to: :multiplier }
 )
 |> Graph.add_edge(
-  %Node{ module: "Virta.Math.Multiply", id: 1 },
-  %Node{ module: "Virta.Core.Out", id: 2 },
+  %Node{ module: Virta.Math.Multiply, id: 1 },
+  %Node{ module: Virta.Core.Out, id: 2 },
   label: %EdgeData{ from: :product, to: :product }
 )
 
 complex_graph = Graph.new(type: :directed)
 |> Graph.add_edge(
-  %Node{ module: "Virta.Core.In", id: 0 },
-  %Node{ module: "Virta.Core.Workflow", id: 1, ref: "adder" },
+  %Node{ module: Virta.Core.In, id: 0 },
+  %Node{ module: Virta.Core.Workflow, id: 1, ref: "adder" },
   label: %EdgeData{ from: :augend, to: :augend }
 )
 |> Graph.add_edge(
-  %Node{ module: "Virta.Core.In", id: 0 },
-  %Node{ module: "Virta.Core.Workflow", id: 1, ref: "adder" },
+  %Node{ module: Virta.Core.In, id: 0 },
+  %Node{ module: Virta.Core.Workflow, id: 1, ref: "adder" },
   label: %EdgeData{ from: :addend, to: :addend }
 )
 |> Graph.add_edge(
-  %Node{ module: "Virta.Core.Workflow", id: 1, ref: "adder" },
-  %Node{ module: "Virta.Core.Workflow", id: 2, ref: "multiplier" },
+  %Node{ module: Virta.Core.Workflow, id: 1, ref: "adder" },
+  %Node{ module: Virta.Core.Workflow, id: 2, ref: "multiplier" },
   label: %EdgeData{ from: :sum, to: :multiplicand }
 )
 |> Graph.add_edge(
-  %Node{ module: "Virta.Core.Workflow", id: 1, ref: "adder" },
-  %Node{ module: "Virta.Core.Workflow", id: 2, ref: "multiplier" },
+  %Node{ module: Virta.Core.Workflow, id: 1, ref: "adder" },
+  %Node{ module: Virta.Core.Workflow, id: 2, ref: "multiplier" },
   label: %EdgeData{ from: :sum, to: :multiplier }
 )
 |> Graph.add_edge(
-  %Node{ module: "Virta.Core.Workflow", id: 2, ref: "multiplier" },
-  %Node{ module: "Virta.Core.Out", id: 3 },
+  %Node{ module: Virta.Core.Workflow, id: 2, ref: "multiplier" },
+  %Node{ module: Virta.Core.Out, id: 3 },
   label: %EdgeData{ from: :product, to: :product }
 )
 
@@ -244,7 +244,7 @@ Registry.get(name)
 #=> #PID<0.572.0>
 
 data = %{
-  %Node{ module: "Virta.Core.In", id: 0 } => [
+  %Node{ module: Virta.Core.In, id: 0 } => [
     { 1, :augend, 10 }, { 1, :addend, 20 }
   ]
 }

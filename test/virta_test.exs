@@ -78,6 +78,8 @@ defmodule VirtaTest do
       %Node{ module: Virta.Core.In, id: 0 } => [{ 1, :augend, 1 }, { 1, :addend, 2 }]
     }
 
-    Virta.Executor.call(name, data)
+    { request_id, output } = Virta.Executor.call(name, data)
+    assert request_id == 1
+    assert output == %{ output: 9 }
   end
 end

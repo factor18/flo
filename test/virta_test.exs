@@ -70,12 +70,16 @@ defmodule VirtaTest do
     Registry.register("adder", adder)
     Registry.register("multiplier", multiplier)
     Registry.register("complex_graph", complex_graph)
-     name = "complex_graph"
+
+    name = "complex_graph"
+
     Registry.get(name)
+
     data = %{
       %Node{ module: Virta.Core.In, id: 0 } => [{ 1, :augend, 1 }, { 1, :addend, 2 }]
     }
-     :poolboy.transaction(String.to_existing_atom(name), fn (server) ->
+
+    :poolboy.transaction(String.to_existing_atom(name), fn (server) ->
       Instance.execute(server, data)
       receive do
         message -> assert message == { 1, %{ output: 9 } }

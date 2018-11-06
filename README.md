@@ -3,6 +3,14 @@
 ### Description
 FBP-ish implementation in elixir
 
+### Installation
+Virta requires Elixir v1.6. Just add :virta to your list of dependencies in mix.exs:
+```elixir
+def deps do
+  [{:virta, "~> 0.1"}]
+end
+```
+
 ### Architecture
 Virta is made up of the following
 
@@ -49,15 +57,15 @@ A sample node looks like:
 Lets look at a sample workflow:
 
 ```elixir
-    alias Virta.Node
-    alias Virta.EdgeData
+alias Virta.Node
+alias Virta.EdgeData
 
-    workflow = Graph.new(type: :directed)
-    |> Graph.add_edge(
-      %Node{ module: Virta.Core.In, id: 0 },
-      %Node{ module: "Virta.Sample.Echo", id: 1 },
-      label: %EdgeData{ from: :data, to: :data }
-    )
+workflow = Graph.new(type: :directed)
+|> Graph.add_edge(
+  %Node{ module: Virta.Core.In, id: 0 },
+  %Node{ module: "Virta.Sample.Echo", id: 1 },
+  label: %EdgeData{ from: :data, to: :data }
+)
 ```
 
 Here `%EdgeData{ from: :data, to: :data }` states that the port :data from `Virta.Core.In` is connected to the port :data of `Virta.Sample.Echo`

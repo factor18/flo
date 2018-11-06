@@ -8,6 +8,9 @@ defmodule Virta.MixProject do
       docs: docs(),
       version: "0.1.0",
       elixir: "~> 1.6",
+      package: package(),
+      description: description(),
+      build_embedded: Mix.env == :prod,
       start_permanent: Mix.env() == :prod,
       elixirc_paths: elixirc_paths(Mix.env),
     ]
@@ -38,6 +41,18 @@ defmodule Virta.MixProject do
         "Components": [Virta.Core.In, Virta.Core.Out, Virta.Core.Workflow],
       ]
     ]
+  end
+
+  defp package() do
+    [
+      files: ~w(lib .formatter.exs mix.exs README* LICENSE*),
+      licenses: ["Apache 2.0"],
+      links: %{"GitHub" => "https://github.com/sarat1669/virta"}
+    ]
+  end
+
+  defp description do
+    "Flow based programming for elixir"
   end
 
   defp elixirc_paths(:test), do: ["lib","test/support"]

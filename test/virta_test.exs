@@ -66,13 +66,11 @@ defmodule VirtaTest do
       label: %EdgeData{ from: :product, to: :output }
     )
 
-    Registry.register("adder", adder)
-    Registry.register("multiplier", multiplier)
-    Registry.register("complex_graph", complex_graph)
+    { :ok, "registered" } = Registry.register("adder", adder)
+    { :ok, "registered" } = Registry.register("multiplier", multiplier)
+    { :ok, "registered" } = Registry.register("complex_graph", complex_graph)
 
     name = "complex_graph"
-
-    Registry.get(name)
 
     data = %{
       %Node{ module: Virta.Core.In, id: 0 } => [{ 1, :augend, 1 }, { 1, :addend, 2 }]

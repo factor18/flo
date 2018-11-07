@@ -46,7 +46,7 @@ defmodule Virta.Registry do
   ```
   """
   def register(name, graph) do
-    GenServer.cast(__MODULE__, { :register, name, graph })
+    GenServer.call(__MODULE__, { :register, name, graph })
   end
 
   @doc """
@@ -57,7 +57,7 @@ defmodule Virta.Registry do
   ```
   """
   def unregister(name) do
-    GenServer.cast(__MODULE__, { :unregister, name })
+    GenServer.call(__MODULE__, { :unregister, name })
   end
 
   # ------------------------------------------------------------------------- Server Callbacks -----
@@ -75,21 +75,21 @@ defmodule Virta.Registry do
     end
   end
 
-  def handle_cast({ :register, name, graph }, state) do
+  def handle_call({ :register, name, graph }, _req, state) do
     if Map.has_key?(state, name) do
-      { :noreply, state }
+      { :reply, { :error, "already_exists" }, state }
     else
       { :ok, pid } = DynamicSupervisor.start_child(InstanceSupervisor, { Pool, %{ name: name, graph: graph } })
-      { :noreply, Map.put(state, name, pid) }
+      { :reply, { :ok, "registered" }, Map.put(state, name, pid) }
     end
   end
 
-  def handle_cast({ :unregister, name }, state) do
+  def handle_call({ :unregister, name }, _req, state) do
     if Map.has_key?(state, name) do
       DynamicSupervisor.terminate_child(InstanceSupervisor, Map.get(state, name))
-      { :noreply, Map.delete(state, name) }
+      { :reply, { :ok, "unregistered" }, Map.delete(state, name) }
     else
-      { :noreply, state }
+      { :reply, { :error, "not_found" }, state }
     end
   end
 end

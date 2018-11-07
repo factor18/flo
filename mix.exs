@@ -6,7 +6,7 @@ defmodule Virta.MixProject do
       app: :virta,
       deps: deps(),
       docs: docs(),
-      version: "0.1.0",
+      version: "0.1.1",
       elixir: "~> 1.6",
       package: package(),
       description: description(),

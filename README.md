@@ -11,6 +11,13 @@ def deps do
 end
 ```
 
+Ensure `:virta` is started before your application:
+```elixir
+def application do
+  [applications: [:virta]]
+end
+```
+
 ### Usage
 Virta is a Flow-Based Programming environment for Elixir. In flow-based programs, the logic of your application is defined as an acyclic graph. The nodes of the graph are instances of components, the edges define the connections between them.
 

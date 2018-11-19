@@ -153,7 +153,7 @@ Virta.Core.Worflow is a special component which allows us to invoke a different 
 
 A workflow node can be represented as %Node{ module: Virta.Core.Workflow, id: 1, ref: "adder" } Notice the :ref property. It refers to the registered workflow with the name adder.
 
-Lets see a code example for a complex worflow which invokes other workflows:
+Lets see a code example for a complex workflow which invokes other workflows:
 
 ```elixir
 alias Virta.Node

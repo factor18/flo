@@ -25,8 +25,16 @@ defmodule Virta do
             {"name": "useStdio", "value": true}
           ],
           "inports": [
-            {"name": "message", "value": "Hello World"}
+            {"name": "message", "value": "Hello"}
           ]
+        },
+        {
+          "id": "delay_1000",
+          "ref": "virta:plugins:component:delay",
+          "settings": [
+            {"name": "delay", "value": 1000}
+          ],
+          "inports": []
         },
         {
           "id": "world_log",
@@ -35,18 +43,19 @@ defmodule Virta do
             {"name": "useStdio", "value": true}
           ],
           "inports": [
-            {"name": "message", "value": "3, 2, 1..."}
+            {"name": "message", "value": "World"}
           ]
         }
       ],
       "links": [
         {"from": "log_timer", "to": "hello_log"},
-        {"from": "log_timer", "to": "world_log"}
+        {"from": "hello_log", "to": "delay_1000"},
+        {"from": "delay_1000", "to": "world_log"}
       ]
     })
 
     Virta.AppRegistry.register(
-      IO.inspect Poison.decode!(app, as: %Virta.App{
+      Poison.decode!(app, as: %Virta.App{
         triggers: [%Virta.Trigger{
           outports: [%Virta.Pair{}],
           settings: [%Virta.Pair{}],

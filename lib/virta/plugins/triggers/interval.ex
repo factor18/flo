@@ -21,9 +21,9 @@ defmodule Virta.Plugins.Trigger.Interval do
   end
 
   @impl true
-  def handle_cast({:register, trigger}, state) do
+  def handle_cast({:register, trigger, tasks}, state) do
     delay = Enum.find(trigger.settings, fn pair -> pair.name == "delay" end).value
-    {:ok, ref} = :timer.send_interval(delay, {:trigger, trigger})
+    {:ok, ref} = :timer.send_interval(delay, {:trigger, trigger, tasks})
     {:noreply, state |> Map.put(trigger.id, ref)}
   end
 
@@ -34,8 +34,8 @@ defmodule Virta.Plugins.Trigger.Interval do
   end
 
   @impl true
-  def handle_info({:trigger, _config}, state) do
-    # TODO: pending
+  def handle_info({:trigger, _trigger, tasks}, state) do
+    _final_context = execute(tasks)
     {:noreply, state}
   end
 end

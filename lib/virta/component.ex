@@ -24,8 +24,10 @@ defmodule Virta.Component do
       @impl true
       def settings, do: @settings
 
-      def execute(context) do
-
+      def execute(task, context) do
+        task_context = context |> Kernel.get_in([:tasks, task.id])
+        outports = run(task_context |> Map.get(:inports), task_context |> Map.get(:settings), context)
+        context |> Kernel.put_in([:tasks, task.id, :outports], outports)
       end
     end
   end

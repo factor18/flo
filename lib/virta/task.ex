@@ -1,7 +1,7 @@
 defmodule Virta.Task do
-  alias Virta.Pair
-
   defstruct id: nil, ref: nil, inports: [], outports: [], settings: []
+
+  alias Virta.Pair
 
   @type t() :: %__MODULE__{
     id: String.t,

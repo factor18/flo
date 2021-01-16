@@ -18,6 +18,7 @@ defmodule Virta.Plugins.Component.Log do
       required: true,
     },
   ]
+
   @outports []
 
   use Component
@@ -26,9 +27,10 @@ defmodule Virta.Plugins.Component.Log do
   def run(inports, settings, context) do
     message = inports["message"]
 
-    if settings["useStdout"] do
+    if settings["useStdio"] do
       IO.puts message
     else
+      # TODO: implement logger
       context.logger.log message
     end
 

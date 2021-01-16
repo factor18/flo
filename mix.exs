@@ -23,7 +23,10 @@ defmodule Virta.MixProject do
   end
 
   defp deps do
-    [{:poison, "~> 3.1"}]
+    [
+      {:poison, "~> 3.1"},
+      {:libgraph, "~> 0.13.3"},
+    ]
   end
 
   defp docs do

@@ -1,60 +1,47 @@
-defmodule Virta.MixProject do
+defmodule Flo.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :virta,
+      app: :flo,
       deps: deps(),
-      docs: docs(),
-      version: "0.1.2",
-      elixir: "~> 1.6",
+      version: "0.2.0",
+      elixir: "~> 1.11",
       package: package(),
       description: description(),
-      build_embedded: Mix.env == :prod,
-      start_permanent: Mix.env() == :prod,
-      elixirc_paths: elixirc_paths(Mix.env),
+      start_permanent: Mix.env() == :prod
     ]
   end
 
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      mod: { Virta, [] },
-      extra_applications: [:logger]
+      extra_applications: [:logger],
+      mod: {Flo.Application, []}
     ]
   end
 
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:libgraph, "~> 0.7"},
-      {:poolboy, "~> 1.5.1"},
-      {:ex_doc, "~> 0.18.0", only: :dev, runtime: false}
-    ]
-  end
-
-  defp docs do
-    [
-      main: "Virta",
-      extras: ["README.md"],
-      groups_for_modules: [
-        "Components": [Virta.Core.In, Virta.Core.Out, Virta.Core.Workflow],
-      ]
+      {:jason, "~> 1.2"},
+      {:solid, "~> 0.8"},
+      {:construct, "~> 2.1"},
+      {:libgraph, "~> 0.13.3"},
+      {:accessible, "~> 0.3.0"},
+      {:luerl, git: "https://github.com/rvirding/luerl.git", branch: "develop"}
     ]
   end
 
   defp package() do
     [
-      files: ~w(lib .formatter.exs mix.exs README* LICENSE*),
       licenses: ["Apache 2.0"],
-      links: %{"GitHub" => "https://github.com/sarat1669/virta"}
+      files: ~w(lib .formatter.exs mix.exs README* LICENSE*),
+      links: %{"GitHub" => "https://github.com/factor18/flo"}
     ]
   end
 
   defp description do
     "Flow based programming for elixir"
   end
-
-  defp elixirc_paths(:test), do: ["lib","test/support"]
-  defp elixirc_paths(_), do: ["lib"]
 end

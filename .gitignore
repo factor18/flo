@@ -20,6 +20,7 @@ erl_crash.dump
 *.ez
 
 # Ignore package tarball (built via "mix hex.build").
-virta-*.tar
+flo-*.tar
 
-/.elixir_ls
+# Temporary files for e.g. tests
+/tmp

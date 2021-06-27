@@ -1,5 +1,5 @@
 defmodule Flo.TriggerSupervisor do
-  use Supervisor, restart: :temporary
+  use Supervisor
 
   alias Flo.{Workflow, Stimulus, TriggerRegistry}
 

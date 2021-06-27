@@ -7,5 +7,6 @@ defmodule Flo.Connection do
     field :source, :string
     field :destination, :string
     field :condition, Flo.Script, default: nil
+    field :outcome, :string, default: "default"
   end
 end

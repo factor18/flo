@@ -34,10 +34,6 @@ defmodule Flo do
       ],
       connections: [
         %Flo.Connection{
-          source: "a",
-          destination: "b"
-        },
-        %Flo.Connection{
           source: "b",
           destination: "c",
           condition: %Flo.Script{language: Flo.Script.Language.lua(), source: "return (math.floor(math.random() + 0.5) == 1)"}

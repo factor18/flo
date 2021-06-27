@@ -20,15 +20,15 @@ defmodule Flo do
       ],
       elements: [
         %Flo.Element{
-          ref: "b",
+          ref: "c",
           name: "delay",
           scope: "core",
           inports: %{
-            "delay" => %Flo.Script{language: Flo.Script.Language.vanilla(), source: 3000}
+            "delay" => %Flo.Script{language: Flo.Script.Language.vanilla(), source: 1500}
           }
         },
         %Flo.Element{
-          ref: "c",
+          ref: "b",
           name: "log",
           scope: "core",
           inports: %{
@@ -54,7 +54,11 @@ defmodule Flo do
           name: "delay",
           scope: "core",
           inports: %{
-            "delay" => %Flo.Script{language: Flo.Script.Language.vanilla(), source: 1000}
+            "delay" => %Flo.Script{language: Flo.Script.Language.vanilla(), source: 1000},
+            "random_error" => %Flo.Script{
+              language: Flo.Script.Language.vanilla(),
+              source: true
+            }
           }
         },
         %Flo.Element{
@@ -64,7 +68,18 @@ defmodule Flo do
           inports: %{
             "message" => %Flo.Script{
               language: Flo.Script.Language.vanilla(),
-              source: "{{\"Hola\"}}"
+              source: "See you soon"
+            }
+          }
+        },
+        %Flo.Element{
+          ref: "g",
+          name: "log",
+          scope: "core",
+          inports: %{
+            "message" => %Flo.Script{
+              language: Flo.Script.Language.vanilla(),
+              source: "Error!!!"
             }
           }
         }
@@ -98,6 +113,11 @@ defmodule Flo do
           source: "e",
           destination: "f",
           outcome: "default"
+        },
+        %Flo.Connection{
+          source: "e",
+          destination: "g",
+          outcome: "error"
         }
       ]
     }

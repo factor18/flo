@@ -3,6 +3,17 @@ defmodule Flo.Context do
 
   use Accessible
 
+  defmodule Outports do
+    @derive Jason.Encoder
+
+    use Accessible
+
+    use Construct do
+      field(:value, :map)
+      field(:outcome, :string)
+    end
+  end
+
   defmodule Stimulus do
     @derive Jason.Encoder
 
@@ -22,7 +33,7 @@ defmodule Flo.Context do
 
     use Construct do
       field(:inports, :map, default: %{})
-      field(:outports, :map, default: nil)
+      field(:outports, Flo.Context.Outports, default: nil)
     end
   end
 
@@ -58,7 +69,7 @@ defmodule Flo.Context do
     context |> Kernel.put_in([:elements, ref], element_context)
   end
 
-  def update_outports(context, %Flo.Element{ref: ref}, outports) do
+  def update_outports(context, %Flo.Element{ref: ref}, %Flo.Context.Outports{} = outports) do
     context |> Kernel.put_in([:elements, ref, :outports], outports)
   end
 

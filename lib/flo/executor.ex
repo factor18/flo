@@ -23,7 +23,7 @@ defmodule Flo.Executor do
 
       execution_context
       |> Map.put(:context, context)
-      |> ExecutionContext.resolve(current)
+      |> ExecutionContext.resolve(current, outports.outcome)
       |> Map.put(:queue, next ++ to_enqueue)
     else
       if ExecutionContext.disabled?(execution_context, current) do

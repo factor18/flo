@@ -92,7 +92,7 @@ defmodule Flo.ExecutionContext do
       Flo.Graph.prev_connections(execution_context.graph, current)
       |> Enum.map(fn edge ->
         execution_context.connections
-        |> Map.get(Flo.Connection.id(edge.v1, edge.v2))
+        |> Map.get(Flo.Connection.id(edge.v1, edge.v2, edge.label))
         |> Map.get(:status)
       end)
 
@@ -113,7 +113,7 @@ defmodule Flo.ExecutionContext do
       Flo.Graph.prev_connections(execution_context.graph, current)
       |> Enum.map(fn edge ->
         execution_context.connections
-        |> Map.get(Flo.Connection.id(edge.v1, edge.v2))
+        |> Map.get(Flo.Connection.id(edge.v1, edge.v2, edge.label))
         |> Map.get(:status)
       end)
 
@@ -126,11 +126,23 @@ defmodule Flo.ExecutionContext do
       (!(statuses |> Enum.empty?()) && statuses |> Enum.all?(&(&1 == "DISABLED")))
   end
 
-  def resolve(%Flo.ExecutionContext{graph: graph} = context, current) do
-    Flo.Graph.next_connections(graph, current)
-    |> Enum.reduce(context, fn edge, context ->
+  def resolve(%Flo.ExecutionContext{workflow: workflow} = context, current, outcome) do
+    workflow.connections
+    |> Enum.filter(fn connection -> connection.source == current end)
+    |> Enum.reduce(context, fn connection, context ->
       context
-      |> Kernel.put_in([:connections, Flo.Connection.id(edge.v1, edge.v2), :status], "RESOLVED")
+      |> Kernel.put_in(
+        [
+          :connections,
+          Flo.Connection.id(connection.source, connection.destination, connection.outcome),
+          :status
+        ],
+        if connection.outcome != outcome do
+          "DISABLED"
+        else
+          "RESOLVED"
+        end
+      )
     end)
     |> Kernel.put_in([:elements, current, :status], "RESOLVED")
   end

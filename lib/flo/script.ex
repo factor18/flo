@@ -23,8 +23,8 @@ defmodule Flo.Script do
   end
 
   use Construct do
+    field(:source, :any)
     field(:language, Flo.Script.Language)
-    field(:source, :string)
   end
 
   # TODO: handle errors

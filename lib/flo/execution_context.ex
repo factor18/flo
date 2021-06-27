@@ -87,35 +87,40 @@ defmodule Flo.ExecutionContext do
     }
   end
 
-  def can_execute?(
-        %Flo.ExecutionContext{graph: graph, connections: connections, elements: elements},
-        current
-      ) do
+  def can_execute?(execution_context, current) do
     statuses =
-      Flo.Graph.prev_connections(graph, current)
+      Flo.Graph.prev_connections(execution_context.graph, current)
       |> Enum.map(fn edge ->
-        connections |> Map.get(Flo.Connection.id(edge.v1, edge.v2)) |> Map.get(:status)
+        execution_context.connections
+        |> Map.get(Flo.Connection.id(edge.v1, edge.v2))
+        |> Map.get(:status)
       end)
 
-    element_status = elements |> Map.get(current) |> Map.get(:status)
+    element_status =
+      execution_context.elements
+      |> Map.get(current)
+      |> Map.get(:status)
 
     atleast_one_resolved =
-      statuses |> Enum.all?(&(&1 != "INITIAL")) && statuses |> Enum.member?("RESOLVED")
+      statuses
+      |> Enum.all?(&(&1 != "INITIAL")) && statuses |> Enum.member?("RESOLVED")
 
     element_status == "INITIAL" && (statuses |> Enum.empty?() || atleast_one_resolved)
   end
 
-  def disabled?(
-        %Flo.ExecutionContext{graph: graph, connections: connections, elements: elements},
-        current
-      ) do
+  def disabled?(execution_context, current) do
     statuses =
-      Flo.Graph.prev_connections(graph, current)
+      Flo.Graph.prev_connections(execution_context.graph, current)
       |> Enum.map(fn edge ->
-        connections |> Map.get(Flo.Connection.id(edge.v1, edge.v2)) |> Map.get(:status)
+        execution_context.connections
+        |> Map.get(Flo.Connection.id(edge.v1, edge.v2))
+        |> Map.get(:status)
       end)
 
-    element_status = elements |> Map.get(current) |> Map.get(:status)
+    element_status =
+      execution_context.elements
+      |> Map.get(current)
+      |> Map.get(:status)
 
     element_status != "INITIAL" ||
       (!(statuses |> Enum.empty?()) && statuses |> Enum.all?(&(&1 == "DISABLED")))

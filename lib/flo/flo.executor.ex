@@ -9,24 +9,17 @@ defmodule Flo.Executor do
     execution_context
   end
 
-  def step(
-        %ExecutionContext{
-          graph: graph,
-          workflow: workflow,
-          queue: [current | next],
-          context: context
-        } = execution_context
-      ) do
+  def step(%ExecutionContext{queue: [current | next]} = execution_context) do
     if ExecutionContext.can_execute?(execution_context, current) do
       element =
-        workflow.elements
+        execution_context.workflow.elements
         |> Enum.find(fn element -> element.ref == current end)
 
       component = ComponentRegistry.component(element.scope, element.name)
-      context = context |> Context.resolve(element)
+      context = execution_context.context |> Context.resolve(element)
       outports = component.run(context |> Kernel.get_in([:elements, element.ref]))
       context = context |> Context.update_outports(element, outports)
-      to_enqueue = graph |> Graph.next(current)
+      to_enqueue = execution_context.graph |> Graph.next(current)
 
       execution_context
       |> Map.put(:context, context)
@@ -35,12 +28,10 @@ defmodule Flo.Executor do
     else
       if ExecutionContext.disabled?(execution_context, current) do
         execution_context
-        |> Map.put(:context, context)
         |> Map.put(:queue, next)
         |> step()
       else
         execution_context
-        |> Map.put(:context, context)
         |> Map.put(:queue, next ++ [current])
         |> step()
       end

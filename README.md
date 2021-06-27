@@ -277,6 +277,17 @@ If there are multiple connections to the component, the component will be execut
 
 If a connection is `DISABLED`, it will recursively disable all connections till a component is found which has a connection still in `INITIAL` or `RESOLVED` state
 
+### TODO
+- [x] Workflow execution
+- [x] Branching and merging
+- [x] Conditional branching
+- [x] Multiple outcomes for components
+- [ ] Loops
+- [ ] Visual Editor
+- [ ] Sub flows
+- [ ] Error handling
+- [ ] Documentation
+
 ### Contributing
 Request a new feature by creating an issue or create a pull request with new features or fixes.
 

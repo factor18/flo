@@ -28,6 +28,7 @@ defmodule Flo.MixProject do
       {:jason, "~> 1.2"},
       {:solid, "~> 0.8"},
       {:construct, "~> 2.1"},
+      {:httpoison, "~> 1.8"},
       {:libgraph, "~> 0.13.3"},
       {:accessible, "~> 0.3.0"},
       {:ex_doc, "~> 0.24", only: :dev, runtime: false},
@@ -37,7 +38,7 @@ defmodule Flo.MixProject do
 
   defp docs do
     [
-      main: "Flo",
+      main: "readme",
       extras: ["README.md"],
       groups_for_modules: [
         components: [

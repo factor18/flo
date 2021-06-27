@@ -46,8 +46,7 @@ defmodule Flo.Trigger do
       def initialize(config), do: {:ok, config}
 
       defp start(workflow, context) do
-        IO.inspect("triggered")
-        # TODO: start execution
+        Flo.Executor.start(workflow, context, strategy: :sync)
       end
 
       defoverridable initialize: 1

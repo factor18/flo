@@ -18,10 +18,6 @@ defmodule Flo.Component do
 
       @spec outports() :: %Flo.Outports{}
       def outports, do: @outports
-
-      def execute(context) do
-        # TODO: parse configs, inports, run
-      end
     end
   end
 end

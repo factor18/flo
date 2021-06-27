@@ -40,7 +40,12 @@ defmodule Flo.Script do
   end
 
   def execute(%Flo.Script{language: "LIQUID", source: source}, %Flo.Context{} = context) do
+    context =
+      context
+      |> Jason.encode!()
+      |> Jason.decode!()
+
     {:ok, template} = Solid.parse(source)
-    {:ok, Solid.render(template, context) |> List.last()}
+    {:ok, Solid.render(template, context) |> to_string}
   end
 end

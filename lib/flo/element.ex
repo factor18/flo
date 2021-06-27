@@ -4,9 +4,9 @@ defmodule Flo.Element do
   use Accessible
 
   use Construct do
-    field :ref, :string
-    field :name, :string
-    field :scope, :string
-    field :inports, {:map, Flo.Script}
+    field(:ref, :string)
+    field(:name, :string)
+    field(:scope, :string)
+    field(:inports, {:map, Flo.Script})
   end
 end

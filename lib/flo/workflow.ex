@@ -6,10 +6,10 @@ defmodule Flo.Workflow do
   use Accessible
 
   use Construct do
-    field :name, :string
-    field :description, :string
-    field :stimuli, {:array, Stimulus}
-    field :elements, {:array, Element}
-    field :connections, {:array, Connection}
+    field(:name, :string)
+    field(:description, :string)
+    field(:stimuli, {:array, Stimulus})
+    field(:elements, {:array, Element})
+    field(:connections, {:array, Connection})
   end
 end

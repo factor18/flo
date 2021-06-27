@@ -4,8 +4,8 @@ defmodule Flo.Port do
   use Accessible
 
   use Construct do
-    field :schema, :map
-    field :name, :string
-    field :required, :boolean
+    field(:schema, :map)
+    field(:name, :string)
+    field(:required, :boolean)
   end
 end

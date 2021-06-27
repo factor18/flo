@@ -13,7 +13,9 @@ defmodule Flo do
           inports: %{},
           scope: "core",
           name: "interval",
-          configs: %{"delay" => %Flo.Script{language: Flo.Script.Language.vanilla(), source: 5000}}
+          configs: %{
+            "delay" => %Flo.Script{language: Flo.Script.Language.vanilla(), source: 5000}
+          }
         }
       ],
       elements: [
@@ -21,14 +23,49 @@ defmodule Flo do
           ref: "b",
           name: "delay",
           scope: "core",
-          inports: %{"delay" => %Flo.Script{language: Flo.Script.Language.vanilla(), source: 3000}}
+          inports: %{
+            "delay" => %Flo.Script{language: Flo.Script.Language.vanilla(), source: 3000}
+          }
         },
         %Flo.Element{
           ref: "c",
           name: "log",
           scope: "core",
           inports: %{
-            "message" => %Flo.Script{language: Flo.Script.Language.liquid(), source: "{{\"Hello World\"}}"}
+            "message" => %Flo.Script{
+              language: Flo.Script.Language.liquid(),
+              source: "{{\"Hello World\"}}"
+            }
+          }
+        },
+        %Flo.Element{
+          ref: "d",
+          name: "log",
+          scope: "core",
+          inports: %{
+            "message" => %Flo.Script{
+              language: Flo.Script.Language.liquid(),
+              source: "{{\"Bye\"}}"
+            }
+          }
+        },
+        %Flo.Element{
+          ref: "e",
+          name: "delay",
+          scope: "core",
+          inports: %{
+            "delay" => %Flo.Script{language: Flo.Script.Language.vanilla(), source: 1000}
+          }
+        },
+        %Flo.Element{
+          ref: "f",
+          name: "log",
+          scope: "core",
+          inports: %{
+            "message" => %Flo.Script{
+              language: Flo.Script.Language.vanilla(),
+              source: "{{\"Hola\"}}"
+            }
           }
         }
       ],
@@ -36,7 +73,31 @@ defmodule Flo do
         %Flo.Connection{
           source: "b",
           destination: "c",
-          condition: %Flo.Script{language: Flo.Script.Language.lua(), source: "return (math.floor(math.random() + 0.5) == 1)"}
+          outcome: "default",
+          condition: %Flo.Script{
+            language: Flo.Script.Language.lua(),
+            source: "return (math.floor(math.random() + 0.5) == 1)"
+          }
+        },
+        %Flo.Connection{
+          source: "b",
+          destination: "d",
+          outcome: "default"
+        },
+        %Flo.Connection{
+          source: "d",
+          destination: "e",
+          outcome: "default"
+        },
+        %Flo.Connection{
+          source: "c",
+          destination: "e",
+          outcome: "default"
+        },
+        %Flo.Connection{
+          source: "e",
+          destination: "f",
+          outcome: "default"
         }
       ]
     }

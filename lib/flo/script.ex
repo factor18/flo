@@ -8,8 +8,9 @@ defmodule Flo.Script do
 
     @entries ["VANILLA", "LUA", "LIQUID"]
 
-    @entries |> Enum.each(fn (entry) ->
-      def unquote(:"#{entry |> String.downcase |> Macro.underscore}")() do
+    @entries
+    |> Enum.each(fn entry ->
+      def unquote(:"#{entry |> String.downcase() |> Macro.underscore()}")() do
         unquote(entry)
       end
     end)
@@ -22,8 +23,8 @@ defmodule Flo.Script do
   end
 
   use Construct do
-    field :language, Flo.Script.Language
-    field :source, :string
+    field(:language, Flo.Script.Language)
+    field(:source, :string)
   end
 
   # TODO: handle errors
@@ -37,6 +38,6 @@ defmodule Flo.Script do
 
   def execute(%Flo.Script{language: "LIQUID", source: source}, %Flo.Context{} = context) do
     {:ok, template} = Solid.parse(source)
-    {:ok, Solid.render(template, context) |> List.last}
+    {:ok, Solid.render(template, context) |> List.last()}
   end
 end

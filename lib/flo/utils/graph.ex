@@ -13,10 +13,12 @@ defmodule Flo.Graph do
   end
 
   def root(graph) do
-    Graph.arborescence_root(graph)
+    Graph.topsort(graph) |> List.first()
   end
 
-  def next(graph, ref) do
-    graph |> Graph.out_neighbors(ref)
-  end
+  defdelegate next(graph, element), to: Graph, as: :out_neighbors
+
+  defdelegate prev_connections(graph, element), to: Graph, as: :in_edges
+
+  defdelegate next_connections(graph, element), to: Graph, as: :out_edges
 end

@@ -9,9 +9,9 @@ defmodule Flo.Context do
     use Accessible
 
     use Construct do
-      field :ref, :string
-      field :configs, :map, default: %{}
-      field :outports, :map, default: nil
+      field(:ref, :string)
+      field(:configs, :map, default: %{})
+      field(:outports, :map, default: nil)
     end
   end
 
@@ -21,8 +21,8 @@ defmodule Flo.Context do
     use Accessible
 
     use Construct do
-      field :inports, :map, default: %{}
-      field :outports, :map, default: nil
+      field(:inports, :map, default: %{})
+      field(:outports, :map, default: nil)
     end
   end
 
@@ -30,22 +30,22 @@ defmodule Flo.Context do
   alias Context.{Element, Stimulus}
 
   use Construct do
-    field :stimulus, Stimulus, default: nil
-    field :elements, {:map, Element}, default: []
+    field(:stimulus, Stimulus, default: nil)
+    field(:elements, {:map, Element}, default: [])
   end
 
   def new(ref, %Flo.Workflow{stimuli: stimuli} = workflow) do
     stimulus =
       stimuli
-      |> Enum.find(fn(%Flo.Stimulus{} = stimulus) -> stimulus.ref == ref end)
+      |> Enum.find(fn %Flo.Stimulus{} = stimulus -> stimulus.ref == ref end)
 
-    stimulus = %Stimulus{ref: ref, configs: stimulus.configs |> parse_ports() }
+    stimulus = %Stimulus{ref: ref, configs: stimulus.configs |> parse_ports()}
 
     elements =
       workflow.elements
       |> Enum.reduce(
         %{},
-        fn (%Flo.Element{inports: inports} = element, acc) ->
+        fn %Flo.Element{inports: inports} = element, acc ->
           acc |> Map.put(element.ref, %Element{inports: inports |> parse_ports()})
         end
       )
@@ -68,6 +68,6 @@ defmodule Flo.Context do
       {:ok, value} = Flo.Script.execute(value, context)
       {key, value}
     end)
-    |> Map.new
+    |> Map.new()
   end
 end

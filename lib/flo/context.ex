@@ -1,9 +1,13 @@
 defmodule Flo.Context do
+  @moduledoc false
+
   @derive Jason.Encoder
 
   use Accessible
 
   defmodule Outports do
+    @moduledoc false
+
     @derive Jason.Encoder
 
     use Accessible
@@ -15,6 +19,8 @@ defmodule Flo.Context do
   end
 
   defmodule Stimulus do
+    @moduledoc false
+
     @derive Jason.Encoder
 
     use Accessible
@@ -27,6 +33,8 @@ defmodule Flo.Context do
   end
 
   defmodule Element do
+    @moduledoc false
+
     @derive Jason.Encoder
 
     use Accessible

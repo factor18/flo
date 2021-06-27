@@ -1,4 +1,6 @@
 defmodule Flo.Application do
+  @moduledoc false
+
   use Application
 
   alias Flo.{TriggerRegistry, ComponentRegistry, WorkflowRegistry, WorkflowSupervisor}

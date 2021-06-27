@@ -1,4 +1,6 @@
 defmodule Flo.TriggerSupervisor do
+  @moduledoc false
+
   use Supervisor
 
   alias Flo.{Workflow, Stimulus, TriggerRegistry}

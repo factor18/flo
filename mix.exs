@@ -5,6 +5,7 @@ defmodule Flo.MixProject do
     [
       app: :flo,
       deps: deps(),
+      docs: docs(),
       version: "0.2.0",
       elixir: "~> 1.11",
       package: package(),
@@ -29,7 +30,24 @@ defmodule Flo.MixProject do
       {:construct, "~> 2.1"},
       {:libgraph, "~> 0.13.3"},
       {:accessible, "~> 0.3.0"},
+      {:ex_doc, "~> 0.24", only: :dev, runtime: false},
       {:luerl, git: "https://github.com/rvirding/luerl.git", branch: "develop"}
+    ]
+  end
+
+  defp docs do
+    [
+      main: "Flo",
+      extras: ["README.md"],
+      groups_for_modules: [
+        components: [
+          Flo.Core.Component.Log,
+          Flo.Core.Component.Delay
+        ],
+        triggers: [
+          Flo.Core.Trigger.Interval
+        ]
+      ]
     ]
   end
 
@@ -42,6 +60,6 @@ defmodule Flo.MixProject do
   end
 
   defp description do
-    "Flow based programming for elixir"
+    "Extensible workflow orchestration framework"
   end
 end

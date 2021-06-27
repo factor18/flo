@@ -1,4 +1,6 @@
 defmodule Flo.Util.ModuleLoader do
+  @moduledoc false
+
   # Loads all modules that extend a given module in the current code path.
   def get_elements(element_type) when is_atom(element_type) do
     available_modules(element_type) |> Enum.reduce([], &load_element/2)

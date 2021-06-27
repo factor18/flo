@@ -10,15 +10,10 @@ defmodule Flo.Core.Component.Delay do
       name: "delay",
       required: true,
       schema: %{"type" => "integer", "minimum" => 0}
-    },
-    %Port{
-      required: true,
-      name: "random_error",
-      schema: %{"type" => "boolean"}
     }
   ]
 
-  @outports %Outports{additional: %{"error" => []}}
+  @outports %Outports{}
 
   use Flo.Component
 
@@ -27,13 +22,6 @@ defmodule Flo.Core.Component.Delay do
     |> Map.get("delay")
     |> :timer.sleep()
 
-    outcome =
-      if inports |> Map.get("random_error") do
-        ["default", "error"] |> Enum.random()
-      else
-        "default"
-      end
-
-    %Context.Outports{outcome: outcome, value: %{}}
+    %Context.Outports{outcome: "default", value: %{}}
   end
 end

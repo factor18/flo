@@ -1,4 +1,6 @@
 defmodule Flo.Graph do
+  @moduledoc false
+
   alias Flo.{Workflow, Connection}
 
   def new(%Workflow{} = workflow) do

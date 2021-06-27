@@ -1,9 +1,13 @@
 defmodule Flo.ExecutionContext do
+  @moduledoc false
+
   @derive Jason.Encoder
 
   use Accessible
 
   defmodule Status do
+    @moduledoc false
+
     @behaviour Construct.Type
 
     @entries ["INITIAL", "RESOLVED", "DISABLED"]
@@ -23,6 +27,8 @@ defmodule Flo.ExecutionContext do
   end
 
   defmodule Connection do
+    @moduledoc false
+
     @derive Jason.Encoder
 
     use Accessible
@@ -36,6 +42,8 @@ defmodule Flo.ExecutionContext do
   end
 
   defmodule Element do
+    @moduledoc false
+
     @derive Jason.Encoder
 
     use Accessible

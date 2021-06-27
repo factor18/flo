@@ -1,4 +1,6 @@
 defmodule Flo.WorkflowSupervisor do
+  @moduledoc false
+
   use DynamicSupervisor
 
   alias Flo.{Workflow, TriggerSupervisor}

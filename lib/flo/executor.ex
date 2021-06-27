@@ -1,4 +1,6 @@
 defmodule Flo.Executor do
+  @moduledoc false
+
   alias Flo.{Graph, Context, Workflow, ComponentRegistry, ExecutionContext}
 
   def start(%Workflow{} = workflow, %Context{} = context) do

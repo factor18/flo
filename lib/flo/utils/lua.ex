@@ -1,4 +1,6 @@
 defmodule Flo.Util.Lua do
+  @moduledoc false
+
   def execute(context, code) do
     state =
       context

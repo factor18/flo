@@ -88,16 +88,16 @@ defmodule Flo do
         %Flo.Connection{
           source: "b",
           destination: "c",
+          outcome: "default"
+        },
+        %Flo.Connection{
+          source: "b",
+          destination: "d",
           outcome: "default",
           condition: %Flo.Script{
             language: Flo.Script.Language.lua(),
             source: "return (math.floor(math.random() + 0.5) == 1)"
           }
-        },
-        %Flo.Connection{
-          source: "b",
-          destination: "d",
-          outcome: "default"
         },
         %Flo.Connection{
           source: "d",

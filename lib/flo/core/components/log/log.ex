@@ -22,6 +22,6 @@ defmodule Flo.Core.Component.Log do
     |> Map.get("message")
     |> Logger.info()
 
-    %{}
+    %Context.Outports{outcome: "default", value: %{}}
   end
 end

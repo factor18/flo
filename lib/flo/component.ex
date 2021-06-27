@@ -1,5 +1,5 @@
 defmodule Flo.Component do
-  @callback run(%Flo.Context.Element{}) :: %{}
+  @callback run(%Flo.Context.Element{}) :: %Flo.Context.Outports{}
 
   defmacro __using__(_) do
     quote do

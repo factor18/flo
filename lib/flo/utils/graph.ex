@@ -6,8 +6,8 @@ defmodule Flo.Graph do
     |> Map.get(:connections)
     |> Enum.reduce(
       Graph.new(type: :directed),
-      fn %Connection{source: source, destination: destination}, graph ->
-        graph |> Graph.add_edge(source, destination)
+      fn %Connection{source: source, destination: destination, outcome: outcome}, graph ->
+        graph |> Graph.add_edge(source, destination, label: outcome)
       end
     )
   end

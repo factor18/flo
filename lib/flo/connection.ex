@@ -11,10 +11,10 @@ defmodule Flo.Connection do
   end
 
   def id(connection) do
-    id(connection.source, connection.destination)
+    id(connection.source, connection.destination, connection.outcome)
   end
 
-  def id(source, destination) do
-    source <> "~>" <> destination
+  def id(source, destination, outcome) do
+    source <> "~>" <> destination <> "=>" <> outcome
   end
 end

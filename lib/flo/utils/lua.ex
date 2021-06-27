@@ -5,13 +5,13 @@ defmodule Flo.Util.Lua do
     state =
       context
       |> Enum.reduce(:luerl_sandbox.init(), fn {k, v}, state ->
-        {value, state} = :luerl_new.encode(v, state)
+        {value, state} = :luerl.encode(v, state)
         :luerl_emul.set_global_key(k, value, state)
       end)
 
     case :luerl_sandbox.run(code, state, 1000) do
       {[value], state} ->
-        {:ok, :luerl_new.decode(value, state) |> decode()}
+        {:ok, :luerl.decode(value, state) |> decode()}
 
       {value, _state} when is_list(value) ->
         {:error, "multi value return not supported"}

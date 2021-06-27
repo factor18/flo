@@ -10,6 +10,13 @@ def deps do
   [{:flo, "~> 0.2"}]
 end
 ```
+
+Add to list of applications
+
+```elixir
+extra_applications: [:logger, :virta]
+```
+
 ### Flo Framework
 Flo exposes two [behaviours](https://elixir-lang.org/getting-started/typespecs-and-behaviours.html#behaviours) which can be used to create your own triggers and components
 - `Component` is a behaviour for exposing common application logic in a reusable manner. Think of this as a function, such as write to database, publish to Kafka, etc that can be used by all Flo apps

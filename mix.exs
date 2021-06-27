@@ -32,7 +32,7 @@ defmodule Flo.MixProject do
       {:libgraph, "~> 0.13.3"},
       {:accessible, "~> 0.3.0"},
       {:ex_doc, "~> 0.24", only: :dev, runtime: false},
-      {:luerl, git: "https://github.com/rvirding/luerl.git", branch: "develop"}
+      {:luerl, "~> 0.4.0"}
     ]
   end
 
@@ -40,6 +40,8 @@ defmodule Flo.MixProject do
     [
       main: "readme",
       extras: ["README.md"],
+      canonical: "http://hexdocs.pm/flo",
+      source_url: "https://github.com/factor18/flo",
       groups_for_modules: [
         components: [
           Flo.Core.Component.Log,
@@ -54,9 +56,10 @@ defmodule Flo.MixProject do
 
   defp package() do
     [
-      licenses: ["Apache 2.0"],
+      maintainers: ["Sarat Chandra Balla"],
       files: ~w(lib .formatter.exs mix.exs README* LICENSE*),
-      links: %{"GitHub" => "https://github.com/factor18/flo"}
+      links: %{"GitHub" => "https://github.com/factor18/flo"},
+      licenses: ["Mozilla Public License, version 2.0 (\"MPL\")"]
     ]
   end
 

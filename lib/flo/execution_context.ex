@@ -35,11 +35,22 @@ defmodule Flo.ExecutionContext do
     end
   end
 
+  defmodule Element do
+    @derive Jason.Encoder
+
+    use Accessible
+
+    use Construct do
+      field(:status, Flo.ExecutionContext.Status)
+    end
+  end
+
   use Construct do
     field(:graph, :any)
     field(:context, Flo.Context)
     field(:workflow, Flo.Workflow)
     field(:queue, {:array, :string})
+    field(:elements, {:map, Flo.ExecutionContext.Element})
     field(:connections, {:map, Flo.ExecutionContext.Connection})
   end
 
@@ -50,15 +61,8 @@ defmodule Flo.ExecutionContext do
     connections =
       workflow.connections
       |> Enum.reduce(%{}, fn connection, acc ->
-        status =
-          if connection.source == root do
-            "PENDING"
-          else
-            "INITIAL"
-          end
-
         c = %Flo.ExecutionContext.Connection{
-          status: status,
+          status: "INITIAL",
           source: connection.source,
           outcome: connection.outcome,
           destination: connection.destination
@@ -67,34 +71,54 @@ defmodule Flo.ExecutionContext do
         acc |> Map.put(Flo.Connection.id(connection), c)
       end)
 
+    elements =
+      workflow.elements
+      |> Enum.reduce(%{}, fn element, acc ->
+        acc |> Map.put(element.ref, %Flo.ExecutionContext.Element{status: "INITIAL"})
+      end)
+
     %Flo.ExecutionContext{
       graph: graph,
       queue: [root],
       context: context,
+      elements: elements,
       workflow: workflow,
       connections: connections
     }
   end
 
-  def can_execute?(%Flo.ExecutionContext{graph: graph, connections: connections}, current) do
+  def can_execute?(
+        %Flo.ExecutionContext{graph: graph, connections: connections, elements: elements},
+        current
+      ) do
     statuses =
       Flo.Graph.prev_connections(graph, current)
       |> Enum.map(fn edge ->
         connections |> Map.get(Flo.Connection.id(edge.v1, edge.v2)) |> Map.get(:status)
       end)
 
-    statuses |> Enum.empty?() ||
-      (statuses |> Enum.all?(&(&1 != "INITIAL")) && statuses |> Enum.member?("RESOLVED"))
+    element_status = elements |> Map.get(current) |> Map.get(:status)
+
+    atleast_one_resolved =
+      statuses |> Enum.all?(&(&1 != "INITIAL")) && statuses |> Enum.member?("RESOLVED")
+
+    element_status == "INITIAL" && (statuses |> Enum.empty?() || atleast_one_resolved)
   end
 
-  def disabled?(%Flo.ExecutionContext{graph: graph, connections: connections}, current) do
+  def disabled?(
+        %Flo.ExecutionContext{graph: graph, connections: connections, elements: elements},
+        current
+      ) do
     statuses =
       Flo.Graph.prev_connections(graph, current)
       |> Enum.map(fn edge ->
         connections |> Map.get(Flo.Connection.id(edge.v1, edge.v2)) |> Map.get(:status)
       end)
 
-    !(statuses |> Enum.empty?()) && statuses |> Enum.all?(&(&1 == "DISABLED"))
+    element_status = elements |> Map.get(current) |> Map.get(:status)
+
+    element_status != "INITIAL" ||
+      (!(statuses |> Enum.empty?()) && statuses |> Enum.all?(&(&1 == "DISABLED")))
   end
 
   def resolve(%Flo.ExecutionContext{graph: graph} = context, current) do
@@ -103,5 +127,6 @@ defmodule Flo.ExecutionContext do
       context
       |> Kernel.put_in([:connections, Flo.Connection.id(edge.v1, edge.v2), :status], "RESOLVED")
     end)
+    |> Kernel.put_in([:elements, current, :status], "RESOLVED")
   end
 end

@@ -22,7 +22,9 @@ Flo exposes two [behaviours](https://elixir-lang.org/getting-started/typespecs-a
 - `Component` is a behaviour for exposing common application logic in a reusable manner. Think of this as a function, such as write to database, publish to Kafka, etc that can be used by all Flo apps
 - `Trigger` is a behaviour for building event-consumers that trigger workflows. The Kafka subscriber is an example of a trigger
 
-Workflow is a combination of Trigger(s) and Components
+ 
+ 
+#### Workflow is a combination of Trigger(s) and Components
 
 - Triggers
   - Invokes the workflow
@@ -39,7 +41,9 @@ Workflow is a combination of Trigger(s) and Components
 Here is the implementation of a component which returns a dog pic of a given breed
 
 `@name` and `@scope` are used for referencing this component in a workflow
+
 `@inports` are a list of properties which can be consumed by the component
+
 `@outports` defines the responses from this component, which can be consumed by other components
 
 ```elixir
@@ -89,11 +93,15 @@ Now this component can be used in all of your workflows
 #### Trigger
 Here is the implementation of a trigger
 `@name` and `@scope` are used for referencing this component in a workflow
+
 `@configs` are a list of configs which can be consumed by the component
+
 `@outports` defines the responses from this component, which can be consumed by other components
 
 `initialize` function will be invoked with a callback function `start`
+
 The `start` function will receive the outports map and will start the workflow whenever called
+
 `Flo.Trigger` uses a `GenServer` behind the scenes, the return of `initialize` will be the return of GenServer's `init` callback
 
 ```elixir
@@ -149,9 +157,13 @@ end
 
 #### Workflow
 ![Image of Workflow](https://user-images.githubusercontent.com/11179580/123558812-dfe03f80-d7b5-11eb-8117-800168b87d15.png)
+
 Here is a sample which implements the above workflow
+
 `stimuli` are the list of triggers
+
 `elements` are the list of components
+
 `connections` form the flow between components
 
 ```elixir
@@ -258,6 +270,7 @@ Here is a sample which implements the above workflow
 ```
 
 A component will be executed when all of the incoming connections are resolved
+
 A connection can be in three states `INITIAL`, `RESOLVED`, `DISABLED`
 
 If there are multiple connections to the component, the component will be executed only when all of the connections are in `RESOLVED` and `DISABLED` state and at least one connection should be in resolved state
@@ -269,4 +282,4 @@ Request a new feature by creating an issue or create a pull request with new fea
 
 ### License
 `Flo` source code is released under Mozilla Public License 2.0.
-Check [LICENSE](https://github.com/factor18/flo/blob/master/LICENSE) file for more information
+Check [LICENSE](https://github.com/factor18/flo/blob/main/LICENSE) file for more information

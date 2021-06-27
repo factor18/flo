@@ -33,7 +33,10 @@ defmodule Flo.Script do
   end
 
   def execute(%Flo.Script{language: "LUA", source: source}, %Flo.Context{} = context) do
-    Flo.Util.Lua.execute(context, source)
+    context
+    |> Jason.encode!()
+    |> Jason.decode!()
+    |> Flo.Util.Lua.execute(source)
   end
 
   def execute(%Flo.Script{language: "LIQUID", source: source}, %Flo.Context{} = context) do

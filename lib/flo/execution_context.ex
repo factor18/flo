@@ -108,6 +108,15 @@ defmodule Flo.ExecutionContext do
     element_status == "INITIAL" && (statuses |> Enum.empty?() || atleast_one_resolved)
   end
 
+  def not_executable?(execution_context, current) do
+    element_status =
+      execution_context.elements
+      |> Map.get(current)
+      |> Map.get(:status)
+
+    element_status != "INITIAL" || execution_context |> disabled?(current)
+  end
+
   def disabled?(execution_context, current) do
     statuses =
       Flo.Graph.prev_connections(execution_context.graph, current)
@@ -117,33 +126,69 @@ defmodule Flo.ExecutionContext do
         |> Map.get(:status)
       end)
 
-    element_status =
-      execution_context.elements
-      |> Map.get(current)
-      |> Map.get(:status)
-
-    element_status != "INITIAL" ||
-      (!(statuses |> Enum.empty?()) && statuses |> Enum.all?(&(&1 == "DISABLED")))
+    !(statuses |> Enum.empty?()) && statuses |> Enum.all?(&(&1 == "DISABLED"))
   end
 
   def resolve(%Flo.ExecutionContext{workflow: workflow} = context, current, outcome) do
+    # TODO: refactor
     workflow.connections
     |> Enum.filter(fn connection -> connection.source == current end)
     |> Enum.reduce(context, fn connection, context ->
-      context
-      |> Kernel.put_in(
-        [
-          :connections,
-          Flo.Connection.id(connection.source, connection.destination, connection.outcome),
-          :status
-        ],
-        if connection.outcome != outcome do
-          "DISABLED"
+      enabled = connection.outcome == outcome
+
+      enabled =
+        if enabled do
+          if connection.condition do
+            {:ok, result} = Flo.Script.execute(connection.condition, context.context)
+            !!result
+          else
+            true
+          end
         else
-          "RESOLVED"
+          enabled
         end
-      )
+
+      status =
+        if enabled do
+          "RESOLVED"
+        else
+          "DISABLED"
+        end
+
+      context = context |> update_connection_status(Flo.Connection.id(connection), status)
+
+      if status == "DISABLED" do
+        disable_recursively(context, connection.destination)
+      else
+        context
+      end
     end)
     |> Kernel.put_in([:elements, current, :status], "RESOLVED")
+  end
+
+  defp update_connection_status(context, connection_id, status) do
+    context
+    |> Kernel.put_in(
+      [
+        :connections,
+        connection_id,
+        :status
+      ],
+      status
+    )
+  end
+
+  defp disable_recursively(context, destination) do
+    if disabled?(context, destination) do
+      context.graph
+      |> Graph.out_edges(destination)
+      |> Enum.reduce(context, fn edge, context ->
+        context
+        |> update_connection_status(Flo.Connection.id(edge.v1, edge.v2, edge.label), "DISABLED")
+        |> disable_recursively(edge.v2)
+      end)
+    else
+      context
+    end
   end
 end

@@ -14,7 +14,7 @@ end
 Add to list of applications
 
 ```elixir
-extra_applications: [:logger, :virta]
+extra_applications: [:logger, :flo]
 ```
 
 ### Flo Framework

@@ -15,6 +15,8 @@ defmodule Flo.Script do
       end
     end)
 
+    def entries, do: @entries
+
     def cast(value) when value in @entries do
       {:ok, value}
     end

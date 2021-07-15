@@ -6,7 +6,7 @@ defmodule Flo.MixProject do
       app: :flo,
       deps: deps(),
       docs: docs(),
-      version: "0.2.0",
+      version: "0.2.1",
       elixir: "~> 1.11",
       package: package(),
       description: description(),
